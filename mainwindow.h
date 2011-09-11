@@ -2,6 +2,8 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QHash>
+#include "mapobject.h"
 
 namespace Ui {
     class MainWindow;
@@ -18,6 +20,10 @@ protected:
 
 private:
     Ui::MainWindow *ui;
+    QHash<int, MapObject *> map;
+
+private slots:
+    void on_actionOpen_triggered();
 };
 
 #endif // MAINWINDOW_H

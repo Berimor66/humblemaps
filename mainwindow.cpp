@@ -24,3 +24,9 @@ void MainWindow::changeEvent(QEvent *e)
         break;
     }
 }
+
+void MainWindow::on_actionOpen_triggered()
+{
+    MapObject *a = new MapObject();
+    map[1] = a;
+}

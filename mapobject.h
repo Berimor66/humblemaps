@@ -11,7 +11,7 @@
 class MapObject : public QObject {
 public:
     MapObject();
-    MapObject(const QString *name);
+    MapObject(const QString name);
     ~MapObject();
     quint64 id;          //unic object id
     quint16 type;

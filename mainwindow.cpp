@@ -27,6 +27,6 @@ void MainWindow::changeEvent(QEvent *e)
 
 void MainWindow::on_actionOpen_triggered()
 {
-    MapObject *a = new MapObject();
+    MapObject *a = new MapObject("test");
     map[1] = a;
 }

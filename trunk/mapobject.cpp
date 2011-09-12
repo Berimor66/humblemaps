@@ -3,9 +3,9 @@
 MapObject::MapObject()
 {
 }
-MapObject::MapObject(const QString *name)
+MapObject::MapObject(const QString name)
 {
-    data["name"] = *name;
+    data["name"] = name;
 }
 
 MapObject::~MapObject()

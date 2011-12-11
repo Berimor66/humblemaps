@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>776</width>
-    <height>432</height>
+    <width>940</width>
+    <height>629</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -19,6 +19,9 @@
   </property>
   <widget class="QWidget" name="centralWidget">
    <layout class="QHBoxLayout" name="horizontalLayout">
+    <property name="margin">
+     <number>1</number>
+    </property>
     <item>
      <widget class="QScrollArea" name="scrollArea">
       <property name="sizePolicy">
@@ -35,10 +38,12 @@
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>684</width>
-         <height>353</height>
+         <width>752</width>
+         <height>545</height>
         </rect>
        </property>
+       <zorder>groupBox</zorder>
+       <zorder>groupBox</zorder>
       </widget>
      </widget>
     </item>
@@ -50,9 +55,105 @@
         <verstretch>0</verstretch>
        </sizepolicy>
       </property>
+      <property name="minimumSize">
+       <size>
+        <width>120</width>
+        <height>0</height>
+       </size>
+      </property>
       <property name="title">
        <string>GroupBox</string>
       </property>
+      <layout class="QFormLayout" name="formLayout">
+       <item row="0" column="0">
+        <widget class="QLabel" name="label">
+         <property name="text">
+          <string>TextLabel</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="0">
+        <widget class="QComboBox" name="comboBox_5">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="0">
+        <widget class="QLabel" name="label_2">
+         <property name="text">
+          <string>TextLabel</string>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="0">
+        <widget class="QComboBox" name="comboBox_4">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+        </widget>
+       </item>
+       <item row="4" column="0">
+        <widget class="QLabel" name="label_3">
+         <property name="text">
+          <string>TextLabel</string>
+         </property>
+        </widget>
+       </item>
+       <item row="5" column="0">
+        <widget class="QComboBox" name="comboBox_3">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+        </widget>
+       </item>
+       <item row="6" column="0">
+        <widget class="QLabel" name="label_4">
+         <property name="text">
+          <string>TextLabel</string>
+         </property>
+        </widget>
+       </item>
+       <item row="7" column="0">
+        <widget class="QComboBox" name="comboBox_2">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+        </widget>
+       </item>
+       <item row="8" column="0">
+        <widget class="QLabel" name="label_5">
+         <property name="text">
+          <string>TextLabel</string>
+         </property>
+        </widget>
+       </item>
+       <item row="9" column="0">
+        <widget class="QComboBox" name="comboBox">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+        </widget>
+       </item>
+       <item row="10" column="0">
+        <widget class="QLineEdit" name="lineEdit"/>
+       </item>
+      </layout>
      </widget>
     </item>
    </layout>
@@ -62,33 +163,40 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>776</width>
-     <height>18</height>
+     <width>940</width>
+     <height>27</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuMap">
     <property name="title">
-     <string>map</string>
+     <string>карта</string>
     </property>
+    <addaction name="action_7"/>
+    <addaction name="separator"/>
+    <addaction name="action_5"/>
    </widget>
    <widget class="QMenu" name="menuEdit">
     <property name="title">
-     <string>edit</string>
+     <string>правка</string>
     </property>
+    <addaction name="action"/>
+    <addaction name="action_2"/>
+    <addaction name="action_3"/>
+    <addaction name="action_4"/>
    </widget>
    <widget class="QMenu" name="menuView">
     <property name="title">
-     <string>view</string>
+     <string>вид</string>
     </property>
    </widget>
    <widget class="QMenu" name="menuTools">
     <property name="title">
-     <string>tools</string>
+     <string>инструменты</string>
     </property>
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="title">
-     <string>help</string>
+     <string>справка</string>
     </property>
     <addaction name="actionContents"/>
     <addaction name="actionAbout"/>
@@ -111,12 +219,12 @@
   <widget class="QStatusBar" name="statusBar"/>
   <action name="actionContents">
    <property name="text">
-    <string>contents</string>
+    <string>содерджание</string>
    </property>
   </action>
   <action name="actionAbout">
    <property name="text">
-    <string>about</string>
+    <string>о программе</string>
    </property>
   </action>
   <action name="actionOpen">
@@ -125,6 +233,36 @@
    </property>
    <property name="toolTip">
     <string>Open</string>
+   </property>
+  </action>
+  <action name="action">
+   <property name="text">
+    <string>редактировать улицы</string>
+   </property>
+  </action>
+  <action name="action_2">
+   <property name="text">
+    <string>редактировать дорожные покрытия</string>
+   </property>
+  </action>
+  <action name="action_3">
+   <property name="text">
+    <string>редактировать автомобили</string>
+   </property>
+  </action>
+  <action name="action_4">
+   <property name="text">
+    <string>редактировать водителей</string>
+   </property>
+  </action>
+  <action name="action_5">
+   <property name="text">
+    <string>Выход</string>
+   </property>
+  </action>
+  <action name="action_7">
+   <property name="text">
+    <string>Создать</string>
    </property>
   </action>
  </widget>

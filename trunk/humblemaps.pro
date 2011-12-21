@@ -6,7 +6,30 @@ TARGET = humblemaps
 TEMPLATE = app
 SOURCES += main.cpp \
     mainwindow.cpp \
-    mapobject.cpp
+    mapobject.cpp \
+    node.cpp \
+    edge.cpp \
+    map.cpp \
+    hmstree.cpp \
+    hmfuel.cpp \
+    hmsurface.cpp \
+    hmcar.cpp \
+    hmcarmodel.cpp \
+    hmroadsign.cpp \
+    hmtrafficlight.cpp \
+    hmdriver.cpp
 HEADERS += mainwindow.h \
-    mapobject.h
+    mapobject.h \
+    main.h \
+    node.h \
+    edge.h \
+    map.h \
+    hmstree.h \
+    hmfuel.h \
+    hmsurface.h \
+    hmcar.h \
+    hmcarmodel.h \
+    hmroadsign.h \
+    hmtrafficlight.h \
+    hmdriver.h
 FORMS += mainwindow.ui

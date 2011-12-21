@@ -30,6 +30,7 @@
 MapObject::MapObject()
 {
 }
+
 MapObject::MapObject(const QString name)
 {
     data["name"] = name;

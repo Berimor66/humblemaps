@@ -3,6 +3,11 @@
 
 #include <QMainWindow>
 #include <QHash>
+#include <QSqlDatabase>
+#include <QSqlRelationalTableModel>
+#include <QSqlQuery>
+#include <QSqlError>
+#include <QSqlResult>
 #include "mapobject.h"
 
 namespace Ui {
@@ -23,6 +28,7 @@ private:
     QHash<int, MapObject *> map;
 
 private slots:
+    void on_comboBox_street_currentIndexChanged(int index);
     void on_actionOpen_triggered();
 };
 

@@ -12,8 +12,8 @@ public:
     explicit HMNode(QObject *parent = 0);
     double x;
     double y;
-    HMEdge *start;
-    HMEdge *end;
+    HMEdge *start[4];
+    HMEdge *end[4];
 signals:
 
 public slots:

@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>940</width>
-    <height>629</height>
+    <width>923</width>
+    <height>569</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -18,32 +18,12 @@
     <normaloff>../Users/Алексей/Desktop/icon100x100.png</normaloff>../Users/Алексей/Desktop/icon100x100.png</iconset>
   </property>
   <widget class="QWidget" name="centralWidget">
+   <property name="layoutDirection">
+    <enum>Qt::LeftToRight</enum>
+   </property>
    <layout class="QHBoxLayout" name="horizontalLayout">
-    <property name="margin">
-     <number>1</number>
-    </property>
     <item>
-     <widget class="QScrollArea" name="scrollArea">
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-        <horstretch>1</horstretch>
-        <verstretch>0</verstretch>
-       </sizepolicy>
-      </property>
-      <property name="widgetResizable">
-       <bool>true</bool>
-      </property>
-      <widget class="QWidget" name="scrollAreaWidgetContents">
-       <property name="geometry">
-        <rect>
-         <x>0</x>
-         <y>0</y>
-         <width>771</width>
-         <height>564</height>
-        </rect>
-       </property>
-      </widget>
-     </widget>
+     <widget class="QWidget" name="widget" native="true"/>
     </item>
     <item>
      <widget class="QGroupBox" name="groupBox">
@@ -59,8 +39,14 @@
         <height>0</height>
        </size>
       </property>
+      <property name="layoutDirection">
+       <enum>Qt::LeftToRight</enum>
+      </property>
       <property name="title">
        <string>GroupBox</string>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
       </property>
       <layout class="QFormLayout" name="formLayout">
        <item row="0" column="0">
@@ -161,7 +147,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>940</width>
+     <width>923</width>
      <height>20</height>
     </rect>
    </property>

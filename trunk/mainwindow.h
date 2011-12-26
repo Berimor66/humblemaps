@@ -9,6 +9,10 @@
 #include <QSqlError>
 #include <QSqlResult>
 #include "mapobject.h"
+#include "edge.h"
+#include "node.h"
+#include "map.h"
+#include <QMouseEvent>
 
 namespace Ui {
     class MainWindow;
@@ -19,9 +23,19 @@ class MainWindow : public QMainWindow {
 public:
     MainWindow(QWidget *parent = 0);
     ~MainWindow();
+    HMNode *nodes[1000];
+    int nodes_count;
+    int selected;
+    HMEdge *edges[1000];
+    int edges_count;
+    int findNode(int x, int y);
 
 protected:
     void changeEvent(QEvent *e);
+    void paintEvent ( QPaintEvent * event );
+    void mousePressEvent(QMouseEvent *event);
+    //void mouseMoveEvent(QMouseEvent *event);
+    void mouseReleaseEvent(QMouseEvent *);
 
 private:
     Ui::MainWindow *ui;

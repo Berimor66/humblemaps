@@ -10,8 +10,11 @@ class HMEdge : public QObject
     Q_OBJECT
 public:
     explicit HMEdge(QObject *parent = 0);
+    explicit HMEdge(HMNode *_start, HMNode *_end);
+    ~HMEdge(void);
     HMNode *start;
     HMNode *end;
+
 signals:
 
 public slots:

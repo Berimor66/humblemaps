@@ -1,6 +1,7 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "streetsedit.h"
+#include "fueledit.h"
 #include <QDebug>
 #include <QPainter>
 #include <QPen>
@@ -219,4 +220,10 @@ void MainWindow::on_pushButton_clicked()
         nodes.erase(nodes.find(selected_node));
     }
     repaint();
+}
+
+void MainWindow::on_action_6_triggered()
+{
+    FuelEdit fe;
+    fe.exec();
 }

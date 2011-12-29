@@ -18,7 +18,8 @@ SOURCES += main.cpp \
     hmroadsign.cpp \
     hmtrafficlight.cpp \
     hmdriver.cpp \
-    streetsedit.cpp
+    streetsedit.cpp \
+    fueledit.cpp
 HEADERS += mainwindow.h \
     mapobject.h \
     main.h \
@@ -33,6 +34,8 @@ HEADERS += mainwindow.h \
     hmroadsign.h \
     hmtrafficlight.h \
     hmdriver.h \
-    streetsedit.h
+    streetsedit.h \
+    fueledit.h
 FORMS += mainwindow.ui \
-    streetsedit.ui
+    streetsedit.ui \
+    fueledit.ui

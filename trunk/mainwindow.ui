@@ -128,6 +128,7 @@
     <addaction name="action_2"/>
     <addaction name="action_3"/>
     <addaction name="action_4"/>
+    <addaction name="action_6"/>
    </widget>
    <widget class="QMenu" name="menuView">
     <property name="title">
@@ -208,6 +209,11 @@
   <action name="action_7">
    <property name="text">
     <string>Создать</string>
+   </property>
+  </action>
+  <action name="action_6">
+   <property name="text">
+    <string>редактирование видов топлива</string>
    </property>
   </action>
  </widget>

@@ -14,6 +14,18 @@ MainWindow::MainWindow(QWidget *parent) :
     gui_state = 0;
     uid = 0;
     uid_edge = 0;
+    qDebug() << trUtf8("Справочник ");
+    QSqlRelationalTableModel *comboModel = new QSqlRelationalTableModel(0);
+    comboModel->setTable("hm_streets");
+
+    int comboIndex = comboModel->fieldIndex("id");
+
+    comboModel->setRelation(comboIndex, QSqlRelation("hm_streets", "id", "name"));
+    comboModel->select();
+
+    QSqlTableModel *comboRelModel = comboModel->relationModel(comboIndex);
+    ui->comboBox_street->setModel(comboRelModel);
+    ui->comboBox_street->setModelColumn(comboRelModel->fieldIndex("name"));
 }
 
 MainWindow::~MainWindow()

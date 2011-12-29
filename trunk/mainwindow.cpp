@@ -2,6 +2,7 @@
 #include "ui_mainwindow.h"
 #include "streetsedit.h"
 #include "fueledit.h"
+#include <qmath.h>
 #include <QDebug>
 #include <QPainter>
 #include <QPen>
@@ -55,7 +56,8 @@ void MainWindow::on_actionOpen_triggered()
 
 void MainWindow::on_comboBox_street_currentIndexChanged(int index)
 {
-
+    if ( edges.contains(selected_edge) )
+        edges[selected_edge]->street_id = index;
 }
 
 void MainWindow::paintEvent (QPaintEvent * event){
@@ -65,7 +67,7 @@ void MainWindow::paintEvent (QPaintEvent * event){
         //HMNode *node;
 
         pen.setColor(QColor::fromRgb(0,0,0));
-        pen.setWidth(1);
+        pen.setWidth(2);
         pen.setJoinStyle(Qt::MiterJoin);
 
         brush.setColor(QColor::fromRgb(90,90,90));
@@ -78,11 +80,19 @@ void MainWindow::paintEvent (QPaintEvent * event){
         foreach(HMNode *node, nodes){
             for(int ed = 0; ed<4; ed++){
                 if((node->start[ed] != NULL)&&(node->start[ed]->end != NULL)){
+                    if ((edges.contains(selected_edge)) && (node->start[ed] == edges[selected_edge]))
+                        pen.setColor(QColor::fromRgb(0,200,0));
+                    else
+                        pen.setColor(QColor::fromRgb(0,0,0));
+                    painter.setPen(pen);
                     painter.drawLine(node->x+5,node->y+5,node->start[ed]->end->x+5,node->start[ed]->end->y+5);
                 }
             }
         }
 
+        pen.setColor(QColor::fromRgb(0,0,0));
+        pen.setWidth(1);
+        painter.setPen(pen);
         foreach(HMNode *node, nodes){
             if(nodes.contains(selected_node) && (nodes[selected_node] == node))
                  brush.setColor(QColor::fromRgb(200,90,90));
@@ -97,25 +107,70 @@ void MainWindow::paintEvent (QPaintEvent * event){
 int MainWindow::findNode(int x, int y){
     foreach(HMNode *node, nodes){
         if (( abs(node->x - x)<20 ) && ( abs(node->y - y)<20 )){
-            qDebug() << "finded";
+            qDebug() << "finded node";
             return nodes.key(node);
         }
     }
     return -1;
 }
 
+int MainWindow::findEdge(int x, int y){
+    int xma, xmi, yma, ymi, r = 0;
+    double p, l, ls, le, h;
+    foreach(HMEdge *edge, edges){
+        xma = 25 +  std::max(edge->start->x, edge->end->x);
+        xmi = -15 + std::min(edge->start->x, edge->end->x);
+        yma = 25 +  std::max(edge->start->y, edge->end->y);
+        ymi = -15 + std::min(edge->start->y, edge->end->y);
+        if ( (edge->start->x == edge->end->x) && (edge->start->x == edge->end->x) ){
+            qDebug() << "WTF?!";
+        } else {
+            l = qSqrt( (edge->start->x - edge->end->x)*(edge->start->x - edge->end->x) + (edge->start->y - edge->end->y)*(edge->start->y - edge->end->y) );
+            ls = qSqrt( (edge->start->x - x)*(edge->start->x - x) + (edge->start->y - y)*(edge->start->y - y) );
+            le = qSqrt( (edge->end->x - x)*(edge->end->x - x) + (edge->end->y - y)*(edge->end->y - y) );
+            qDebug() << l;
+            qDebug() << ls;
+            qDebug() << le;
+            p = (l + le + ls)/2.0;
+            h = qSqrt( p * (p - l) * (p - le) * (p - ls) ) / ( l );
+            qDebug() << h;
+        }
+        if ((xmi<x)&&(x<xma)&&(ymi<y)&&(y<yma)&&(h<15)){
+            qDebug() << "finded edge";
+            return edges.key(edge);
+        }
+    }
+    return -1;
+}
+
+void MainWindow::select_edge(int edge_num){
+    selected_node = -1;
+    selected_edge = edge_num;
+    ui->comboBox_street->setCurrentIndex(edges[edge_num]->street_id);
+
+}
+
+void MainWindow::select_node(int node_num){
+    selected_edge = -1;
+    selected_node = node_num;
+
+}
+
 void MainWindow::mousePressEvent(QMouseEvent *event)
 {
-    int node_num;
+    int node_num, edge_num;
     switch(gui_state){
     case 0:
         if(event->button() == Qt::LeftButton){
             node_num = findNode(event->x(), event->y());
+            edge_num = findEdge(event->x(), event->y());
             if (node_num >= 0){
                 selected_node = node_num;
+                selected_edge = -1;
                 gui_state = 1;
-            } else if (0) {
-
+            } else if (edge_num >= 0) {
+                select_edge(edge_num);
+                gui_state = 5;
             } else {
                 gui_state = 2;
             }
@@ -125,6 +180,7 @@ void MainWindow::mousePressEvent(QMouseEvent *event)
             node_num = findNode(event->x(), event->y());
             if (node_num >= 0){
                 selected_node = node_num;
+                selected_edge = -1;
                 gui_state = 3;
             }
             repaint();
@@ -159,6 +215,7 @@ void MainWindow::mouseReleaseEvent(QMouseEvent *event)
         if (event->button() == Qt::LeftButton){
             nodes[uid] = new HMNode(event->x()-5, event->y()-5);
             selected_node = uid;
+            selected_edge = -1;
             uid++;
             gui_state = 0;
             qDebug() << "added node";
@@ -168,8 +225,10 @@ void MainWindow::mouseReleaseEvent(QMouseEvent *event)
     case 3:
         if (event->button() == Qt::RightButton){
             end = findNode(event->x(), event->y());
-            if(end>=0)
+            if(end>=0){
                 edges[uid_edge] = new HMEdge(nodes[selected_node], nodes[end]);
+                uid_edge++;
+            }
             gui_state = 0;
             repaint();
         }
@@ -177,6 +236,7 @@ void MainWindow::mouseReleaseEvent(QMouseEvent *event)
     case 4:
         break;
     case 5:
+        gui_state = 0;
         break;
     }
  }

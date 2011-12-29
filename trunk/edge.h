@@ -14,6 +14,7 @@ public:
     ~HMEdge(void);
     HMNode *start;
     HMNode *end;
+    int street_id;
 
 signals:
 

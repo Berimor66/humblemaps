@@ -33,6 +33,9 @@ protected:
     void mouseMoveEvent(QMouseEvent *event);
     void mouseReleaseEvent(QMouseEvent *);
     int findNode(int x, int y);
+    int findEdge(int x, int y);
+    void select_edge(int edge_num);
+    void select_bode(int node_num);
 
 private:
     Ui::MainWindow *ui;

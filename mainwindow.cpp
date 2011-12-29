@@ -2,6 +2,8 @@
 #include "ui_mainwindow.h"
 #include "streetsedit.h"
 #include "fueledit.h"
+#include "surfaceedit.h"
+#include "selectmap.h"
 #include <qmath.h>
 #include <QDebug>
 #include <QPainter>
@@ -21,6 +23,18 @@ MainWindow::MainWindow(QWidget *parent) :
     FillStreets();
 }
 
+void MainWindow::clear_map(){
+    foreach(HMNode *node, nodes){
+        delete node;
+    }
+    nodes.clear();
+    edges.clear();
+}
+
+void MainWindow::fill_map(){
+    clear_map();
+}
+
 void MainWindow::FillStreets(){
     QSqlRelationalTableModel *comboModel = new QSqlRelationalTableModel(0);
     comboModel->setTable("hm_streets");
@@ -30,6 +44,7 @@ void MainWindow::FillStreets(){
     QSqlTableModel *comboRelModel = comboModel->relationModel(comboIndex);
     ui->comboBox_street->setModel(comboRelModel);
     ui->comboBox_street->setModelColumn(comboRelModel->fieldIndex("name"));
+
 }
 
 MainWindow::~MainWindow()
@@ -64,6 +79,8 @@ void MainWindow::paintEvent (QPaintEvent * event){
         QPainter painter;
         QPen pen;
         QBrush brush;
+        double angle;
+        int fx,fy,tx,ty;
         //HMNode *node;
 
         pen.setColor(QColor::fromRgb(0,0,0));
@@ -80,12 +97,24 @@ void MainWindow::paintEvent (QPaintEvent * event){
         foreach(HMNode *node, nodes){
             for(int ed = 0; ed<4; ed++){
                 if((node->start[ed] != NULL)&&(node->start[ed]->end != NULL)){
+                    fx = node->x+5;
+                    fy = node->y+5;
+                    tx = node->start[ed]->end->x+5;
+                    ty = node->start[ed]->end->y+5;
+                    angle = qAtan2(tx-fx, ty-fy);
+                    fx += 5.0*qCos(angle);
+                    fy += 5.0*qSin(-angle);
+                    tx += 5.0*qCos(angle);
+                    ty += 5.0*qSin(-angle);
+                    qDebug() << angle;
                     if ((edges.contains(selected_edge)) && (node->start[ed] == edges[selected_edge]))
                         pen.setColor(QColor::fromRgb(0,200,0));
                     else
                         pen.setColor(QColor::fromRgb(0,0,0));
                     painter.setPen(pen);
-                    painter.drawLine(node->x+5,node->y+5,node->start[ed]->end->x+5,node->start[ed]->end->y+5);
+                    painter.drawLine(fx,fy,tx,ty);
+                    painter.drawLine(tx-15.0*qSin(angle-0.3),ty-15.0*qCos(angle-0.3),tx,ty);
+                    painter.drawLine(tx-15.0*qSin(angle+0.3),ty-15.0*qCos(angle+0.3),tx,ty);
                 }
             }
         }
@@ -115,32 +144,41 @@ int MainWindow::findNode(int x, int y){
 }
 
 int MainWindow::findEdge(int x, int y){
-    int xma, xmi, yma, ymi, r = 0;
-    double p, l, ls, le, h;
+    //TODO: find nearest edge
+    int xma, xmi, yma, ymi, r = 0, angle, res = -1;
+    double p, l, ls, le, h, fx, fy, ty, tx, min_h = 15.0;
     foreach(HMEdge *edge, edges){
         xma = 25 +  std::max(edge->start->x, edge->end->x);
         xmi = -15 + std::min(edge->start->x, edge->end->x);
         yma = 25 +  std::max(edge->start->y, edge->end->y);
         ymi = -15 + std::min(edge->start->y, edge->end->y);
+
+        fx = edge->start->x+5;
+        fy = edge->start->y+5;
+        tx = edge->end->x+5;
+        ty = edge->end->y+5;
+        angle = qAtan2(tx-fx, ty-fy);
+        fx += 5.0*qCos(angle);
+        fy += 5.0*qSin(-angle);
+        tx += 5.0*qCos(angle);
+        ty += 5.0*qSin(-angle);
+
         if ( (edge->start->x == edge->end->x) && (edge->start->x == edge->end->x) ){
             qDebug() << "WTF?!";
         } else {
-            l = qSqrt( (edge->start->x - edge->end->x)*(edge->start->x - edge->end->x) + (edge->start->y - edge->end->y)*(edge->start->y - edge->end->y) );
-            ls = qSqrt( (edge->start->x - x)*(edge->start->x - x) + (edge->start->y - y)*(edge->start->y - y) );
-            le = qSqrt( (edge->end->x - x)*(edge->end->x - x) + (edge->end->y - y)*(edge->end->y - y) );
-            qDebug() << l;
-            qDebug() << ls;
-            qDebug() << le;
+            l = qSqrt( (fx - tx)*(fx - tx) + (fy - ty)*(fy - ty) );
+            ls = qSqrt( (fx - x)*(fx - x) + (fy - y)*(fy - y) );
+            le = qSqrt( (tx - x)*(tx - x) + (ty - y)*(ty - y) );
             p = (l + le + ls)/2.0;
             h = qSqrt( p * (p - l) * (p - le) * (p - ls) ) / ( l );
-            qDebug() << h;
         }
-        if ((xmi<x)&&(x<xma)&&(ymi<y)&&(y<yma)&&(h<15)){
-            qDebug() << "finded edge";
-            return edges.key(edge);
+        if ((xmi<x)&&(x<xma)&&(ymi<y)&&(y<yma)&&(h<min_h)){
+            qDebug() << "finded edge " << h;
+            res = edges.key(edge);
+            min_h = h;
         }
     }
-    return -1;
+    return res;
 }
 
 void MainWindow::select_edge(int edge_num){
@@ -264,11 +302,7 @@ void MainWindow::on_action_triggered()
 
 void MainWindow::on_action_7_triggered()
 {
-    foreach(HMNode *node, nodes){
-        delete node;
-    }
-    nodes.clear();
-    edges.clear();
+    clear_map();
     repaint();
 }
 
@@ -285,4 +319,20 @@ void MainWindow::on_action_6_triggered()
 {
     FuelEdit fe;
     fe.exec();
+}
+
+void MainWindow::on_action_2_triggered()
+{
+    SurfaceEdit sfe;
+    sfe.exec();
+}
+
+void MainWindow::on_action_open_triggered()
+{
+    SelectMap sm;
+    if ( sm.exec() ){
+        map_id = sm.map_id;
+        fill_map();
+    }
+
 }

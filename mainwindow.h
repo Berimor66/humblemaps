@@ -36,6 +36,8 @@ protected:
     int findEdge(int x, int y);
     void select_edge(int edge_num);
     void select_node(int node_num);
+    void fill_map();
+    void clear_map();
 
 private:
     Ui::MainWindow *ui;
@@ -45,8 +47,11 @@ private:
     int uid;
     int uid_edge;
     void FillStreets();
+    int map_id;
 
 private slots:
+    void on_action_open_triggered();
+    void on_action_2_triggered();
     void on_action_6_triggered();
     void on_pushButton_clicked();
     void on_action_7_triggered();

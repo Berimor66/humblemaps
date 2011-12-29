@@ -117,6 +117,7 @@
      <string>карта</string>
     </property>
     <addaction name="action_7"/>
+    <addaction name="action_open"/>
     <addaction name="separator"/>
     <addaction name="action_5"/>
    </widget>
@@ -214,6 +215,11 @@
   <action name="action_6">
    <property name="text">
     <string>редактирование видов топлива</string>
+   </property>
+  </action>
+  <action name="action_open">
+   <property name="text">
+    <string>Открыть</string>
    </property>
   </action>
  </widget>

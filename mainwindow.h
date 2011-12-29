@@ -23,25 +23,29 @@ class MainWindow : public QMainWindow {
 public:
     MainWindow(QWidget *parent = 0);
     ~MainWindow();
-    HMNode *nodes[1000];
-    int nodes_count;
-    int selected;
-    HMEdge *edges[1000];
-    int edges_count;
-    int findNode(int x, int y);
+    int selected_node;
+    int selected_edge;
 
 protected:
     void changeEvent(QEvent *e);
     void paintEvent ( QPaintEvent * event );
     void mousePressEvent(QMouseEvent *event);
-    //void mouseMoveEvent(QMouseEvent *event);
+    void mouseMoveEvent(QMouseEvent *event);
     void mouseReleaseEvent(QMouseEvent *);
+    int findNode(int x, int y);
 
 private:
     Ui::MainWindow *ui;
-    QHash<int, MapObject *> map;
+    QHash<int, HMNode *> nodes;
+    QHash<int, HMEdge *> edges;
+    int gui_state;
+    int uid;
+    int uid_edge;
 
 private slots:
+    void on_pushButton_clicked();
+    void on_action_7_triggered();
+    void on_action_triggered();
     void on_comboBox_street_currentIndexChanged(int index);
     void on_actionOpen_triggered();
 };

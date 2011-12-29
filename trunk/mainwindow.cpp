@@ -15,14 +15,16 @@ MainWindow::MainWindow(QWidget *parent) :
     uid = 0;
     uid_edge = 0;
     qDebug() << trUtf8("Справочник ");
+
+    FillStreets();
+}
+
+void MainWindow::FillStreets(){
     QSqlRelationalTableModel *comboModel = new QSqlRelationalTableModel(0);
     comboModel->setTable("hm_streets");
-
     int comboIndex = comboModel->fieldIndex("id");
-
     comboModel->setRelation(comboIndex, QSqlRelation("hm_streets", "id", "name"));
     comboModel->select();
-
     QSqlTableModel *comboRelModel = comboModel->relationModel(comboIndex);
     ui->comboBox_street->setModel(comboRelModel);
     ui->comboBox_street->setModelColumn(comboRelModel->fieldIndex("name"));
@@ -197,6 +199,7 @@ void MainWindow::on_action_triggered()
 {
     StreetsEdit se;
     se.exec();
+    FillStreets();
 }
 
 void MainWindow::on_action_7_triggered()

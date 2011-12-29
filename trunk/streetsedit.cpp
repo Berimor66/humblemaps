@@ -88,3 +88,8 @@ void StreetsEdit::on_pushButton_2_clicked()
     ui->lineEdit->clear();
     FillTable();
 }
+
+void StreetsEdit::on_tableView_clicked(QModelIndex index)
+{
+    ui->lineEdit->setText(ui->tableView->model()->data(ui->tableView->model()->index(index.row(),1)).toString());
+}

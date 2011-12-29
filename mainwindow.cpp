@@ -147,13 +147,15 @@ void MainWindow::select_edge(int edge_num){
     selected_node = -1;
     selected_edge = edge_num;
     ui->comboBox_street->setCurrentIndex(edges[edge_num]->street_id);
-
+    ui->groupBox_street->show();
+    ui->groupBox_node->hide();
 }
 
 void MainWindow::select_node(int node_num){
     selected_edge = -1;
     selected_node = node_num;
-
+    ui->groupBox_street->hide();
+    ui->groupBox_node->show();
 }
 
 void MainWindow::mousePressEvent(QMouseEvent *event)
@@ -165,8 +167,7 @@ void MainWindow::mousePressEvent(QMouseEvent *event)
             node_num = findNode(event->x(), event->y());
             edge_num = findEdge(event->x(), event->y());
             if (node_num >= 0){
-                selected_node = node_num;
-                selected_edge = -1;
+                select_node(node_num);
                 gui_state = 1;
             } else if (edge_num >= 0) {
                 select_edge(edge_num);
@@ -179,8 +180,7 @@ void MainWindow::mousePressEvent(QMouseEvent *event)
         if(event->button() == Qt::RightButton){
             node_num = findNode(event->x(), event->y());
             if (node_num >= 0){
-                selected_node = node_num;
-                selected_edge = -1;
+                select_node(node_num);
                 gui_state = 3;
             }
             repaint();
@@ -214,8 +214,7 @@ void MainWindow::mouseReleaseEvent(QMouseEvent *event)
     case 2:
         if (event->button() == Qt::LeftButton){
             nodes[uid] = new HMNode(event->x()-5, event->y()-5);
-            selected_node = uid;
-            selected_edge = -1;
+             select_node(uid);
             uid++;
             gui_state = 0;
             qDebug() << "added node";

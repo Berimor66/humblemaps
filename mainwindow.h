@@ -41,6 +41,7 @@ private:
     int gui_state;
     int uid;
     int uid_edge;
+    void FillStreets();
 
 private slots:
     void on_pushButton_clicked();

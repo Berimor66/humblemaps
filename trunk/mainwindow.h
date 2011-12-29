@@ -35,7 +35,7 @@ protected:
     int findNode(int x, int y);
     int findEdge(int x, int y);
     void select_edge(int edge_num);
-    void select_bode(int node_num);
+    void select_node(int node_num);
 
 private:
     Ui::MainWindow *ui;

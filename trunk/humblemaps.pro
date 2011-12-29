@@ -19,7 +19,9 @@ SOURCES += main.cpp \
     hmtrafficlight.cpp \
     hmdriver.cpp \
     streetsedit.cpp \
-    fueledit.cpp
+    fueledit.cpp \
+    surfaceedit.cpp \
+    selectmap.cpp
 HEADERS += mainwindow.h \
     mapobject.h \
     main.h \
@@ -35,7 +37,11 @@ HEADERS += mainwindow.h \
     hmtrafficlight.h \
     hmdriver.h \
     streetsedit.h \
-    fueledit.h
+    fueledit.h \
+    surfaceedit.h \
+    selectmap.h
 FORMS += mainwindow.ui \
     streetsedit.ui \
-    fueledit.ui
+    fueledit.ui \
+    surfaceedit.ui \
+    selectmap.ui

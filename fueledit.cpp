@@ -18,8 +18,9 @@ void FuelEdit::FillTable()
 {
     QString str_oper = "SELECT * FROM hm_fuel";
     QSqlQueryModel * model_Oper = new QSqlQueryModel(0);
-        model_Oper->setQuery(str_oper);
-        model_Oper->setHeaderData(1, Qt::Horizontal, QObject::trUtf8("Название топлива"));
+    model_Oper->setQuery(str_oper);
+    model_Oper->setHeaderData(1, Qt::Horizontal, QObject::trUtf8("Название топлива"));
+    model_Oper->setHeaderData(2, Qt::Horizontal, QObject::trUtf8("Цена топлива"));
     ui->tableView->setModel(model_Oper);
     ui->tableView->hideColumn(0);
 }
@@ -39,6 +40,7 @@ void FuelEdit::on_pushButton_3_clicked()
             QSqlQuery sqlQuery_rem_fuel(str_rem_fuel);
             qDebug() << "result: " << sqlQuery_rem_fuel.exec();
             ui->lineEdit->clear();
+            ui->lineEdit_2->clear();
         }
     }
     FillTable();
@@ -47,7 +49,7 @@ void FuelEdit::on_pushButton_3_clicked()
 void FuelEdit::on_pushButton_clicked()
 {
     qDebug() << "selected: " << ui->tableView->model()->data(ui->tableView->model()->index(ui->tableView->currentIndex().row(),0)).toString();
-    QString str_upd_fuel = "UPDATE hm_fuel SET name='"+ui->lineEdit->text()+
+    QString str_upd_fuel = "UPDATE hm_fuel SET name='"+ui->lineEdit->text()+"', price='"+ui->lineEdit_2->text()+
     "' WHERE id="+ui->tableView->model()->data(ui->tableView->model()->index(ui->tableView->currentIndex().row(),0)).toString();
     qDebug() << str_upd_fuel;
     QSqlQuery sqlQuery_upd_fuel;
@@ -60,6 +62,7 @@ void FuelEdit::on_pushButton_clicked()
         QMessageBox::information(this,trUtf8("Информация"),trUtf8("Запись обновлена"));
     }
     ui->lineEdit->clear();
+    ui->lineEdit_2->clear();
     FillTable();
 }
 
@@ -71,8 +74,8 @@ void FuelEdit::on_pushButton_2_clicked()
     }
     else
     {
-        QString str_add_fuel = "INSERT INTO hm_fuel (name)"
-                                "VALUES ('"+ui->lineEdit->text()+"');";
+        QString str_add_fuel = "INSERT INTO hm_fuel (name, price)"
+                                "VALUES ('"+ui->lineEdit->text()+"', "+ui->lineEdit_2->text()+");";
         QSqlQuery sqlQuery_add_fuel;
         if (!sqlQuery_add_fuel.exec(str_add_fuel))
         {
@@ -85,10 +88,12 @@ void FuelEdit::on_pushButton_2_clicked()
 
     }
     ui->lineEdit->clear();
+    ui->lineEdit_2->clear();
     FillTable();
 }
 
 void FuelEdit::on_tableView_clicked(QModelIndex index)
 {
     ui->lineEdit->setText(ui->tableView->model()->data(ui->tableView->model()->index(index.row(),1)).toString());
+    ui->lineEdit_2->setText(ui->tableView->model()->data(ui->tableView->model()->index(index.row(),2)).toString());
 }

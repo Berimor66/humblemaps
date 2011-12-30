@@ -69,7 +69,7 @@ MainWindow::MainWindow(QWidget *parent) :
     uid = 0;
     uid_edge = 0;
     qDebug() << trUtf8("Справочник ");
-
+    clear_map();
     FillStreets();
 }
 
@@ -77,8 +77,15 @@ void MainWindow::clear_map(){
     foreach(HMNode *node, nodes){
         delete node;
     }
+    path.clear();
     nodes.clear();
     edges.clear();
+    QSqlQuery Query("SELECT MAX(id) from hm_edge;");
+    Query.next();
+    uid_edge = Query.value(0).toInt()+1;
+    QSqlQuery Query1("SELECT MAX(id) from hm_node;");
+    Query1.next();
+    uid = Query1.value(0).toInt()+1;
 }
 
 void MainWindow::fill_map(){
@@ -89,14 +96,19 @@ void MainWindow::fill_map(){
         if (Query.value(0).toInt() >= uid)
             uid = Query.value(0).toInt() + 1;
         nodes[Query.value(0).toInt()] = new HMNode(Query.value(1).toInt(), Query.value(2).toInt());
-        qDebug() << Query.value(1) << Query.value(2);
+        //qDebug() << Query.value(1) << Query.value(2);
     }
     QSqlQuery Query_e("SELECT * FROM hm_edge WHERE map_id="+QString::number(map_id)+";");
     while(Query_e.next()){
         if (Query_e.value(0).toInt() >= uid_edge)
             uid_edge = Query_e.value(0).toInt() + 1;
-        edges[Query_e.value(0).toInt()] = new HMEdge( nodes[Query_e.value(2).toInt()], nodes[Query_e.value(3).toInt()]);
-        qDebug() << Query_e.value(2) << Query_e.value(3);
+        if((nodes[Query_e.value(2).toInt()]!=NULL)&&
+           (nodes[Query_e.value(3).toInt()]!=NULL)){
+            edges[Query_e.value(0).toInt()] = new HMEdge( nodes[Query_e.value(2).toInt()], nodes[Query_e.value(3).toInt()]);
+        } else {
+            qDebug() << "ERROR!!!";
+            qDebug() << Query_e.value(2) << Query_e.value(3);
+        }
     }
 }
 
@@ -129,6 +141,7 @@ void MainWindow::optimize(){
     G.clear();
     D.clear();
     P.clear();
+    n = 0;
     foreach(HMEdge *edge, edges){
         a = nodes.key(edge->start);
         b = nodes.key(edge->end);
@@ -337,6 +350,8 @@ void MainWindow::mousePressEvent(QMouseEvent *event)
 {
     int node_num, edge_num;
 
+    path.clear();
+
     if (gui_state == 20)
         gui_state = 0;
 
@@ -397,6 +412,11 @@ void MainWindow::mousePressEvent(QMouseEvent *event)
 }
 
 void MainWindow::add_node(int x, int y){
+    if (map_id > 100){
+        qDebug() << "map_id not defined";
+        close();
+        return;
+    }
     QString str_add_fuel = "INSERT INTO hm_node (x, y, map_id) "
                            "VALUES ("+QString::number(x)+", "+QString::number(y)+", "+ QString::number(map_id) +");";
     qDebug() << str_add_fuel;
@@ -422,7 +442,32 @@ void MainWindow::update_node(int id){
     }
 }
 
+void MainWindow::del_node(int id){
+    qDebug() << "enter";
+    for(int i=0; i<4; i++){
+        if(nodes[id]->start[i] != NULL){
+            qDebug() << "start";
+            del_edge(edges.key(nodes[id]->start[i]));
+            delete edges[edges.key(nodes[id]->start[i])];
+            nodes[id]->start[i] = NULL;
+            edges.erase(edges.find(edges.key(nodes[id]->start[i])));
+        }
+        if(nodes[id]->end[i] != NULL){
+            qDebug() << "end";
+            del_edge(edges.key(nodes[id]->end[i]));
+            delete edges[edges.key(nodes[id]->end[i])];
+            edges.erase(edges.find(edges.key(nodes[id]->end[i])));
+        }
+    }
+
+}
+
 void MainWindow::add_edge(int st, int end){
+    if (map_id > 100){
+        qDebug() << "map_id not defined";
+        close();
+        return;
+    }
     QString str_add_fuel = "INSERT INTO hm_edge (start_id, end_id, map_id) "
                            "VALUES ("+QString::number(st)+", "+QString::number(end)+", "+ QString::number(map_id) +");";
     qDebug() << str_add_fuel;
@@ -517,21 +562,24 @@ void MainWindow::on_action_7_triggered()
                                           trUtf8("Название карты:"), QLineEdit::Normal,
                                           QDir::home().dirName(), &ok);
     if (ok && !text.isEmpty()){
-    QString str_add_map = "INSERT INTO hm_maps (name) VALUES ('"+text+"');";
-    QSqlQuery sqlQuery_add_map;
-    if (!sqlQuery_add_map.exec(str_add_map)){
+        QString str_add_map = "INSERT INTO hm_maps (name) VALUES ('"+text+"');";
+        QSqlQuery sqlQuery_add_map;
+        if (sqlQuery_add_map.exec(str_add_map)){
+            fill_map();
 
-
-
-        fill_map();
-        repaint();
+            QSqlQuery Query1("SELECT LAST_INSERT_ID() FROM hm_maps;");
+            Query1.next();
+            map_id = Query1.value(0).toInt()-1;
+            repaint();
+        }
     }
-    }
+
 }
 
 void MainWindow::on_pushButton_clicked()
 {
     if (nodes.contains(selected_node)){
+        del_node(selected_node);
         if (nodes[selected_node]->start[0] != NULL) edges.erase(edges.find( edges.key(nodes[selected_node]->start[0]) ));
         if (nodes[selected_node]->start[1] != NULL) edges.erase(edges.find( edges.key(nodes[selected_node]->start[1]) ));
         if (nodes[selected_node]->start[2] != NULL) edges.erase(edges.find( edges.key(nodes[selected_node]->start[2]) ));
@@ -566,7 +614,6 @@ void MainWindow::on_action_open_triggered()
         fill_map();
         repaint();
     }
-
 }
 
 void MainWindow::on_pushButton_2_clicked()
@@ -605,6 +652,7 @@ void MainWindow::on_action_8_triggered()
 {
     gui_state = 20;
     optimize();
+    QMessageBox::information(NULL,QObject::trUtf8("t"),QString::number(D[to_node]));
 }
 
 void MainWindow::on_action_9_triggered()

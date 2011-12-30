@@ -89,7 +89,12 @@ void MainWindow::changeEvent(QEvent *e)
 
 void MainWindow::on_actionOpen_triggered()
 {
-
+    SelectMap sm;
+    if ( sm.exec() ){
+        map_id = sm.map_id;
+        fill_map();
+        repaint();
+    }
 }
 
 void MainWindow::on_comboBox_street_currentIndexChanged(int index)

@@ -242,6 +242,8 @@
      <string>инструменты</string>
     </property>
     <addaction name="action_8"/>
+    <addaction name="action_9"/>
+    <addaction name="action_10"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="title">
@@ -327,6 +329,16 @@
   <action name="action_8">
    <property name="text">
     <string>Построить кратчайший маршрут</string>
+   </property>
+  </action>
+  <action name="action_9">
+   <property name="text">
+    <string>Выбрать начало</string>
+   </property>
+  </action>
+  <action name="action_10">
+   <property name="text">
+    <string>Выбрать конец</string>
    </property>
   </action>
  </widget>

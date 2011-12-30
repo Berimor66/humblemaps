@@ -45,6 +45,7 @@ protected:
     void add_edge(int st, int end);
     void update_edge(int id);
     void del_edge(int id);
+    void optimize();
 
 private:
     Ui::MainWindow *ui;
@@ -55,8 +56,15 @@ private:
     int uid_edge;
     void FillStreets();
     int map_id;
+    QVector<HMEdge*> path;
+    int from_node;
+    int to_node;
+    void Dijkstra(int s);
 
 private slots:
+    void on_action_10_triggered();
+    void on_action_9_triggered();
+    void on_action_8_triggered();
     void on_action_5_triggered();
     void on_lineEdit_velocity_returnPressed();
     void on_checkBox_clicked(bool checked);

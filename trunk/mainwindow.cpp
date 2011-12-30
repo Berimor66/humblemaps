@@ -9,12 +9,14 @@
 #include <QPainter>
 #include <QPen>
 #include <QBrush>
+#include <QInputDialog>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+    ui->groupBox_street->hide();
     gui_state = 0;
     uid = 0;
     uid_edge = 0;
@@ -32,7 +34,27 @@ void MainWindow::clear_map(){
 }
 
 void MainWindow::fill_map(){
+    qDebug() << "fill map" << map_id;
     clear_map();
+    QSqlQuery Query("SELECT * FROM hm_node WHERE map_id="+QString::number(map_id)+";");
+    while(Query.next()){
+        if (Query.value(0).toInt() >= uid)
+            uid = Query.value(0).toInt() + 1;
+        nodes[Query.value(0).toInt()] = new HMNode(Query.value(1).toInt(), Query.value(2).toInt());
+        qDebug() << Query.value(1) << Query.value(2);
+    }
+    QSqlQuery Query_e("SELECT * FROM hm_edge WHERE map_id="+QString::number(map_id)+";");
+    while(Query_e.next()){
+        if (Query_e.value(0).toInt() >= uid_edge)
+            uid_edge = Query_e.value(0).toInt() + 1;
+        edges[Query_e.value(0).toInt()] = new HMEdge( nodes[Query_e.value(2).toInt()], nodes[Query_e.value(3).toInt()]);
+        qDebug() << Query_e.value(2) << Query_e.value(3);
+    }
+}
+
+MainWindow::~MainWindow()
+{
+    delete ui;
 }
 
 void MainWindow::FillStreets(){
@@ -47,10 +69,11 @@ void MainWindow::FillStreets(){
 
 }
 
-MainWindow::~MainWindow()
-{
-    delete ui;
+bool MainWindow::load_map(){
+
+    return true;
 }
+
 
 void MainWindow::changeEvent(QEvent *e)
 {
@@ -110,7 +133,7 @@ void MainWindow::paintEvent (QPaintEvent * event){
                     if ((edges.contains(selected_edge)) && (node->start[ed] == edges[selected_edge]))
                         pen.setColor(QColor::fromRgb(0,200,0));
                     else
-                        pen.setColor(QColor::fromRgb(0,0,0));
+                        pen.setColor(QColor::fromRgb(50,50,50));
                     painter.setPen(pen);
                     painter.drawLine(fx,fy,tx,ty);
                     painter.drawLine(tx-15.0*qSin(angle-0.3),ty-15.0*qCos(angle-0.3),tx,ty);
@@ -124,11 +147,11 @@ void MainWindow::paintEvent (QPaintEvent * event){
         painter.setPen(pen);
         foreach(HMNode *node, nodes){
             if(nodes.contains(selected_node) && (nodes[selected_node] == node))
-                 brush.setColor(QColor::fromRgb(200,90,90));
+                 brush.setColor(QColor::fromRgb(90,200,90));
             else
                  brush.setColor(QColor::fromRgb(90,90,90));
             painter.setBrush(brush);
-            painter.drawEllipse(node->x,node->y,10,10);
+            painter.drawEllipse(node->x-5,node->y-5,20,20);
         }
         painter.end();
 }
@@ -166,10 +189,10 @@ int MainWindow::findEdge(int x, int y){
         if ( (edge->start->x == edge->end->x) && (edge->start->x == edge->end->x) ){
             qDebug() << "WTF?!";
         } else {
-            l = qSqrt( (fx - tx)*(fx - tx) + (fy - ty)*(fy - ty) );
-            ls = qSqrt( (fx - x)*(fx - x) + (fy - y)*(fy - y) );
-            le = qSqrt( (tx - x)*(tx - x) + (ty - y)*(ty - y) );
-            p = (l + le + ls)/2.0;
+            l =  qSqrt( (fx - tx)*(fx - tx) + (fy - ty)*(fy - ty) );
+            ls = qSqrt( (fx -  x)*(fx -  x) + (fy -  y)*(fy -  y) );
+            le = qSqrt( (tx -  x)*(tx -  x) + (ty -  y)*(ty -  y) );
+            p = (l + le + ls)/ 2.0;
             h = qSqrt( p * (p - l) * (p - le) * (p - ls) ) / ( l );
         }
         if ((xmi<x)&&(x<xma)&&(ymi<y)&&(y<yma)&&(h<min_h)){
@@ -187,6 +210,8 @@ void MainWindow::select_edge(int edge_num){
     ui->comboBox_street->setCurrentIndex(edges[edge_num]->street_id);
     ui->groupBox_street->show();
     ui->groupBox_node->hide();
+    ui->checkBox->setChecked( edges[edge_num]->policeman );
+    ui->lineEdit_velocity->setText( QString::number( edges[edge_num]->max_velocity ) );
 }
 
 void MainWindow::select_node(int node_num){
@@ -237,6 +262,55 @@ void MainWindow::mousePressEvent(QMouseEvent *event)
     }
 }
 
+void MainWindow::add_node(int x, int y){
+    QString str_add_fuel = "INSERT INTO hm_node (x, y, map_id) "
+                           "VALUES ("+QString::number(x)+", "+QString::number(y)+", "+ QString::number(map_id) +");";
+    qDebug() << str_add_fuel;
+    QSqlQuery sqlQuery_add_fuel;
+    if (!sqlQuery_add_fuel.exec(str_add_fuel))
+    {
+        //QMessageBox::warning(this,trUtf8("Ошибка"),trUtf8("Запись не обновлена"));
+    }
+    else
+    {
+        //QMessageBox::information(this,trUtf8("Информация"),trUtf8("Запись добавлена"));
+    }
+    nodes[uid] = new HMNode(x, y);
+}
+
+void MainWindow::update_node(int id){
+    QString str_upd_node = "UPDATE hm_node SET x='"+QString::number(nodes[id]->x)+"', y='"+QString::number(nodes[id]->y)+
+                           "' WHERE id="+QString::number(id);
+    qDebug() << str_upd_node;
+    QSqlQuery sqlQuery_upd_node;
+    if (sqlQuery_upd_node.exec(str_upd_node)){
+        qDebug() << "updated";
+    }
+}
+
+void MainWindow::add_edge(int st, int end){
+    QString str_add_fuel = "INSERT INTO hm_edge (start_id, end_id, map_id) "
+                           "VALUES ("+QString::number(st)+", "+QString::number(end)+", "+ QString::number(map_id) +");";
+    qDebug() << str_add_fuel;
+    QSqlQuery sqlQuery_add_fuel;
+    if (!sqlQuery_add_fuel.exec(str_add_fuel))
+    {
+        qDebug() << trUtf8("Запись не обновлена");
+    }
+    else
+    {
+        qDebug() << trUtf8("Запись добавлена");
+    }
+    edges[uid_edge] = new HMEdge(nodes[st], nodes[end]);
+}
+
+void MainWindow::del_edge(int id){
+    QString str_rem_surface = "DELETE FROM hm_edge WHERE id="+QString::number(id);
+    qDebug() << "request: " << str_rem_surface;
+    QSqlQuery sqlQuery_rem_surface(str_rem_surface);
+    qDebug() << "result: " << sqlQuery_rem_surface.exec();
+}
+
 void MainWindow::mouseReleaseEvent(QMouseEvent *event)
 {
     int end = -1;
@@ -245,14 +319,15 @@ void MainWindow::mouseReleaseEvent(QMouseEvent *event)
         break;
     case 1:
         if (event->button() == Qt::LeftButton){
+            update_node(selected_node);
             gui_state = 0;
             repaint();
         }
         break;
     case 2:
         if (event->button() == Qt::LeftButton){
-            nodes[uid] = new HMNode(event->x()-5, event->y()-5);
-             select_node(uid);
+            add_node(event->x()-5, event->y()-5);
+            select_node(uid);
             uid++;
             gui_state = 0;
             qDebug() << "added node";
@@ -263,7 +338,8 @@ void MainWindow::mouseReleaseEvent(QMouseEvent *event)
         if (event->button() == Qt::RightButton){
             end = findNode(event->x(), event->y());
             if(end>=0){
-                edges[uid_edge] = new HMEdge(nodes[selected_node], nodes[end]);
+                add_edge( selected_node, end );
+                //edges[uid_edge] = new HMEdge(nodes[selected_node], nodes[end]);
                 uid_edge++;
             }
             gui_state = 0;
@@ -302,13 +378,34 @@ void MainWindow::on_action_triggered()
 
 void MainWindow::on_action_7_triggered()
 {
-    clear_map();
-    repaint();
+    bool ok;
+     QString text = QInputDialog::getText(this, trUtf8("Создание карты"),
+                                          trUtf8("Название карты:"), QLineEdit::Normal,
+                                          QDir::home().dirName(), &ok);
+    if (ok && !text.isEmpty()){
+    QString str_add_map = "INSERT INTO hm_maps (name) VALUES ('"+text+"');";
+    QSqlQuery sqlQuery_add_map;
+    if (!sqlQuery_add_map.exec(str_add_map)){
+
+
+
+        fill_map();
+        repaint();
+    }
+    }
 }
 
 void MainWindow::on_pushButton_clicked()
 {
     if (nodes.contains(selected_node)){
+        if (nodes[selected_node]->start[0] != NULL) edges.erase(edges.find( edges.key(nodes[selected_node]->start[0]) ));
+        if (nodes[selected_node]->start[1] != NULL) edges.erase(edges.find( edges.key(nodes[selected_node]->start[1]) ));
+        if (nodes[selected_node]->start[2] != NULL) edges.erase(edges.find( edges.key(nodes[selected_node]->start[2]) ));
+        if (nodes[selected_node]->start[3] != NULL) edges.erase(edges.find( edges.key(nodes[selected_node]->start[3]) ));
+        if (nodes[selected_node]->end[0] != NULL) edges.erase(edges.find( edges.key(nodes[selected_node]->end[0]) ));
+        if (nodes[selected_node]->end[1] != NULL) edges.erase(edges.find( edges.key(nodes[selected_node]->end[1]) ));
+        if (nodes[selected_node]->end[2] != NULL) edges.erase(edges.find( edges.key(nodes[selected_node]->end[2]) ));
+        if (nodes[selected_node]->end[3] != NULL) edges.erase(edges.find( edges.key(nodes[selected_node]->end[3]) ));
         delete nodes[selected_node];
         nodes.erase(nodes.find(selected_node));
     }
@@ -333,6 +430,39 @@ void MainWindow::on_action_open_triggered()
     if ( sm.exec() ){
         map_id = sm.map_id;
         fill_map();
+        repaint();
     }
 
+}
+
+void MainWindow::on_pushButton_2_clicked()
+{
+    if (edges.contains(selected_edge)){
+        del_edge(selected_edge);
+        delete edges[selected_edge];
+        edges.erase(edges.find(selected_edge));
+        repaint();
+    }
+}
+
+void MainWindow::on_checkBox_clicked()
+{
+
+}
+
+void MainWindow::on_checkBox_clicked(bool checked)
+{
+    if ( edges.contains(selected_edge) )
+        edges[selected_edge]->policeman = checked;
+}
+
+void MainWindow::on_lineEdit_velocity_returnPressed()
+{
+    if ( edges.contains(selected_edge) )
+        edges[selected_edge]->max_velocity = ui->lineEdit_velocity->text().toInt();
+}
+
+void MainWindow::on_action_5_triggered()
+{
+    close();
 }

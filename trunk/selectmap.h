@@ -2,6 +2,12 @@
 #define SELECTMAP_H
 
 #include <QDialog>
+#include <QHash>
+#include <QSqlDatabase>
+#include <QSqlRelationalTableModel>
+#include <QSqlQuery>
+#include <QSqlError>
+#include <QSqlResult>
 
 namespace Ui {
     class SelectMap;

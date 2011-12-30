@@ -16,6 +16,7 @@ HMEdge::HMEdge(HMNode *_start, HMNode *_end)
         start->del_edge(this);
         end->del_edge(this);
     }
+    max_velocity = 100.0;
 }
 
 HMEdge::~HMEdge(void){

@@ -38,6 +38,13 @@ protected:
     void select_node(int node_num);
     void fill_map();
     void clear_map();
+    bool load_map();
+    void add_node(int x, int y);
+    void update_node(int id);
+    void del_node(int id);
+    void add_edge(int st, int end);
+    void update_edge(int id);
+    void del_edge(int id);
 
 private:
     Ui::MainWindow *ui;
@@ -50,6 +57,11 @@ private:
     int map_id;
 
 private slots:
+    void on_action_5_triggered();
+    void on_lineEdit_velocity_returnPressed();
+    void on_checkBox_clicked(bool checked);
+    void on_checkBox_clicked();
+    void on_pushButton_2_clicked();
     void on_action_open_triggered();
     void on_action_2_triggered();
     void on_action_6_triggered();

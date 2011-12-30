@@ -278,7 +278,7 @@
   </action>
   <action name="actionOpen">
    <property name="text">
-    <string>actionOpen</string>
+    <string>Открыть</string>
    </property>
    <property name="toolTip">
     <string>Open</string>

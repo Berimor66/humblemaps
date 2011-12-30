@@ -10,6 +10,54 @@
 #include <QPen>
 #include <QBrush>
 #include <QInputDialog>
+#include <vector>
+#include <set>
+
+using namespace std;
+
+typedef vector<int> vi;
+typedef pair<int,int> ii;
+typedef vector<ii> vii;
+typedef vector<vii> vvii;
+
+const int MAX = 1001;
+const int MAXINT = 1000000000;
+
+int n;
+vvii G(MAX);
+vi D(MAX, MAXINT);
+vi P(MAX, MAXINT);
+
+void MainWindow::Dijkstra(int s)
+{
+    set<ii> Q;
+    D[s] = 0;
+    Q.insert(ii(0,s));
+
+    while(!Q.empty())
+    {
+        ii top = *Q.begin();
+        Q.erase(Q.begin());
+        int v = top.second;
+        int d = top.first;
+
+        for (vii::const_iterator it = G[v].begin(); it != G[v].end(); it++)
+        {
+            int v2 = it->first;
+            int cost = it->second;
+            if (D[v2] > D[v] + cost)
+            {
+                if (D[v2] != 1000000000)
+                {
+                    Q.erase(Q.find(ii(D[v2], v2)));
+                }
+                D[v2] = D[v] + cost;
+                P[v2] = v;
+                Q.insert(ii(D[v2], v2));
+            }
+        }
+    }
+}
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -74,6 +122,40 @@ bool MainWindow::load_map(){
     return true;
 }
 
+void MainWindow::optimize(){
+    int a = 0, b = 1, w = 10, t;
+
+    path.clear();
+    G.clear();
+    D.clear();
+    P.clear();
+    foreach(HMEdge *edge, edges){
+        a = nodes.key(edge->start);
+        b = nodes.key(edge->end);
+        w = qSqrt( (edge->start->x - edge->end->x)*(edge->start->x - edge->end->x) +
+                   (edge->start->y - edge->end->y)*(edge->start->y - edge->end->y) );
+        G[a].push_back(ii(b, w));
+        G[b].push_back(ii(a, w));
+    }
+    Dijkstra(from_node);
+    if (P[to_node]<1000000){
+        t = to_node;
+        while(t != from_node){
+            qDebug() << t;
+            foreach(HMEdge *edge, edges){
+                if ( (nodes.key(edge->start) == t) && (nodes.key(edge->end) == P[t]) )
+                    path.push_back(edge);
+                if ( (nodes.key(edge->start) == P[t]) && (nodes.key(edge->end) == t) )
+                    path.push_back(edge);
+            }
+            t = P[t];
+        }
+    }
+    qDebug() << D[to_node];
+    repaint();
+    //qDebug() << P[to_node] << P[P[to_node]] << P[P[P[to_node]]] << P[P[P[P[to_node]]]];
+    return;
+}
 
 void MainWindow::changeEvent(QEvent *e)
 {
@@ -134,7 +216,7 @@ void MainWindow::paintEvent (QPaintEvent * event){
                     fy += 5.0*qSin(-angle);
                     tx += 5.0*qCos(angle);
                     ty += 5.0*qSin(-angle);
-                    qDebug() << angle;
+                    //qDebug() << angle;
                     if ((edges.contains(selected_edge)) && (node->start[ed] == edges[selected_edge]))
                         pen.setColor(QColor::fromRgb(0,200,0));
                     else
@@ -147,14 +229,39 @@ void MainWindow::paintEvent (QPaintEvent * event){
             }
         }
 
+        foreach(HMEdge *edge, path){
+            if(1){
+                fx = edge->start->x+5;
+                fy = edge->start->y+5;
+                tx = edge->end->x+5;
+                ty = edge->end->y+5;
+                angle = qAtan2(tx-fx, ty-fy);
+                fx += 5.0*qCos(angle);
+                fy += 5.0*qSin(-angle);
+                tx += 5.0*qCos(angle);
+                ty += 5.0*qSin(-angle);
+                //qDebug() << angle;
+                pen.setColor(QColor::fromRgb(0,0,200));
+                painter.setPen(pen);
+                painter.drawLine(fx,fy,tx,ty);
+                painter.drawLine(tx-15.0*qSin(angle-0.3),ty-15.0*qCos(angle-0.3),tx,ty);
+                painter.drawLine(tx-15.0*qSin(angle+0.3),ty-15.0*qCos(angle+0.3),tx,ty);
+            }
+        }
+
+
         pen.setColor(QColor::fromRgb(0,0,0));
         pen.setWidth(1);
         painter.setPen(pen);
         foreach(HMNode *node, nodes){
             if(nodes.contains(selected_node) && (nodes[selected_node] == node))
                  brush.setColor(QColor::fromRgb(90,200,90));
+            else if(nodes.contains(from_node) && (nodes[from_node] == node))
+                brush.setColor(QColor::fromRgb(200,90,90));
+            else if(nodes.contains(to_node) && (nodes[to_node] == node))
+                brush.setColor(QColor::fromRgb(90,90,200));
             else
-                 brush.setColor(QColor::fromRgb(90,90,90));
+                brush.setColor(QColor::fromRgb(90,90,90));
             painter.setBrush(brush);
             painter.drawEllipse(node->x-5,node->y-5,20,20);
         }
@@ -229,6 +336,10 @@ void MainWindow::select_node(int node_num){
 void MainWindow::mousePressEvent(QMouseEvent *event)
 {
     int node_num, edge_num;
+
+    if (gui_state == 20)
+        gui_state = 0;
+
     switch(gui_state){
     case 0:
         if(event->button() == Qt::LeftButton){
@@ -260,9 +371,27 @@ void MainWindow::mousePressEvent(QMouseEvent *event)
         break;
     case 3:
         break;
-    case 4:
+    case 21:
+        if(event->button() == Qt::LeftButton){
+            node_num = findNode(event->x(), event->y());
+            if (node_num >= 0){
+                from_node = node_num;
+                path.clear();
+                gui_state = 0;
+            }
+            repaint();
+        }
         break;
-    case 5:
+    case 22:
+        if(event->button() == Qt::LeftButton){
+            node_num = findNode(event->x(), event->y());
+            if (node_num >= 0){
+                to_node = node_num;
+                path.clear();
+                gui_state = 0;
+            }
+            repaint();
+        }
         break;
     }
 }
@@ -470,4 +599,20 @@ void MainWindow::on_lineEdit_velocity_returnPressed()
 void MainWindow::on_action_5_triggered()
 {
     close();
+}
+
+void MainWindow::on_action_8_triggered()
+{
+    gui_state = 20;
+    optimize();
+}
+
+void MainWindow::on_action_9_triggered()
+{
+    gui_state = 21;
+}
+
+void MainWindow::on_action_10_triggered()
+{
+    gui_state = 22;
 }

@@ -221,7 +221,12 @@ void MainWindow::on_comboBox_street_currentIndexChanged(int index)
     }
 }
 
+bool inRect(int x, int y, int fx, int fy, int w, int h){
+    return ( (fx<=x)&&(x<=fx+w) )&&( (fy<y)&&(y<fy+h) );
+}
+
 void MainWindow::paintEvent (QPaintEvent * event){
+
         QPainter painter;
         QPen pen;
         QBrush brush;
@@ -259,6 +264,13 @@ void MainWindow::paintEvent (QPaintEvent * event){
                     fy = node->y+5;
                     tx = node->start[ed]->end->x+5;
                     ty = node->start[ed]->end->y+5;
+
+                    if(
+                       !inRect(fx, fy, ui->widget->geometry().x(), ui->widget->geometry().y()+43, ui->widget->geometry().width(), ui->widget->geometry().height()) ||
+                       !inRect(tx, ty, ui->widget->geometry().x(), ui->widget->geometry().y()+43, ui->widget->geometry().width(), ui->widget->geometry().height())
+                      )
+                        continue;
+
                     angle = qAtan2(tx-fx, ty-fy);
                     fx += 5.0*qCos(angle);
                     fy += 5.0*qSin(-angle);
@@ -283,6 +295,13 @@ void MainWindow::paintEvent (QPaintEvent * event){
                 fy = edge->start->y+5;
                 tx = edge->end->x+5;
                 ty = edge->end->y+5;
+
+                if(
+                   !inRect(fx, fy, ui->widget->geometry().x(), ui->widget->geometry().y()+43, ui->widget->geometry().width(), ui->widget->geometry().height()) ||
+                   !inRect(tx, ty, ui->widget->geometry().x(), ui->widget->geometry().y()+43, ui->widget->geometry().width(), ui->widget->geometry().height())
+                  )
+                    continue;
+
                 angle = qAtan2(tx-fx, ty-fy);
                 fx += 5.0*qCos(angle);
                 fy += 5.0*qSin(-angle);
@@ -311,6 +330,8 @@ void MainWindow::paintEvent (QPaintEvent * event){
             else
                 brush.setColor(QColor::fromRgb(90,90,90));
             painter.setBrush(brush);
+            if( !inRect(node->x-5, node->y-5, ui->widget->geometry().x(), ui->widget->geometry().y()+43, ui->widget->geometry().width(), ui->widget->geometry().height()) )
+                continue;
             painter.drawEllipse(node->x-5,node->y-5,20,20);
         }
         painter.end();

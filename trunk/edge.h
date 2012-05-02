@@ -16,7 +16,7 @@ public:
     HMNode *end;
     int street_id;
     bool policeman;
-    double max_velocity;
+    int surface_id;
 
 signals:
 

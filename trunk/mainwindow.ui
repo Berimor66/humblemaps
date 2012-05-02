@@ -240,6 +240,9 @@
      <string>Инструменты</string>
     </property>
     <addaction name="action_8"/>
+    <addaction name="action_11"/>
+    <addaction name="action_15"/>
+    <addaction name="separator"/>
     <addaction name="action_9"/>
     <addaction name="action_10"/>
     <addaction name="separator"/>
@@ -329,7 +332,7 @@
   </action>
   <action name="action_8">
    <property name="text">
-    <string>Построить кратчайший маршрут</string>
+    <string>Построить наиболее короткий маршрут</string>
    </property>
   </action>
   <action name="action_9">
@@ -355,6 +358,16 @@
   <action name="action_14">
    <property name="text">
     <string>выбрать изображение</string>
+   </property>
+  </action>
+  <action name="action_11">
+   <property name="text">
+    <string>Построить наиболее дешёвый маршрут</string>
+   </property>
+  </action>
+  <action name="action_15">
+   <property name="text">
+    <string>Построить наиболее быстрый маршрут</string>
    </property>
   </action>
  </widget>

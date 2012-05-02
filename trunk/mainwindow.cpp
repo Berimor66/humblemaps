@@ -120,6 +120,9 @@ void MainWindow::fill_map(){
             edges[Query_e.value(0).toInt()] = new HMEdge( nodes[Query_e.value(2).toInt()], nodes[Query_e.value(3).toInt()]);
             edges[Query_e.value(0).toInt()]->street_id = Query_e.value(1).toInt();
             edges[Query_e.value(0).toInt()]->surface_id = Query_e.value(4).toInt();
+            edges[Query_e.value(0).toInt()]->max_speed = getSurfaceSpeed(Query_e.value(4).toInt());
+
+            edges[Query_e.value(0).toInt()]->policeman = Query_e.value(5).toBool();
 
         } else {
             qDebug() << "ERROR!!!";
@@ -167,7 +170,7 @@ bool MainWindow::load_map(){
     return true;
 }
 
-void MainWindow::optimize(){
+void MainWindow::optimize(int what){
     int a = 0, b = 1, w = 10, t;
 
     path.clear();
@@ -180,7 +183,29 @@ void MainWindow::optimize(){
         b = nodes.key(edge->end);
         w = qSqrt( (edge->start->x - edge->end->x)*(edge->start->x - edge->end->x) +
                    (edge->start->y - edge->end->y)*(edge->start->y - edge->end->y) );
-        G[a].push_back(ii(b, w));
+        if(what == 1){
+            G[a].push_back(ii(b, w));
+        }
+        if(what == 2){
+            w = fuel_price * w;
+            G[a].push_back(ii(b, w));
+            qDebug() << "zakon:" << zakon << " w:" << w << " a:" << a << " b:" << b << " policeman:" << edge->policeman;
+            if(!zakon){
+                if(edge->policeman){
+                    G[b].push_back(ii(a, 500+w));
+                } else {
+                    G[b].push_back(ii(a, w));
+                }
+            }
+        }
+        if(what == 3){
+            if(!zakon){
+                G[a].push_back( ii(b, w/min(max_speed, edge->max_speed) ));
+                G[b].push_back( ii(a, w/min(max_speed, edge->max_speed) ));
+            } else {
+                close();
+            }
+        }
     }
     Dijkstra(from_node);
     if (P[to_node]<1000000){
@@ -737,7 +762,7 @@ void MainWindow::on_action_5_triggered()
 void MainWindow::on_action_8_triggered()
 {
     gui_state = 20;
-    optimize();
+    optimize(1);
     ui->statusBar->showMessage(trUtf8("Расстояние: ")+QString::number(3*D[to_node])+trUtf8(" м."), 2000);
 }
 
@@ -761,19 +786,30 @@ void MainWindow::on_action_12_triggered()
     sm.setup("hm_drivers");
     if ( sm.exec() ){
         drv_id = sm.id;
-        fill_map();
-        repaint();
+        QSqlQuery QueryTail("SELECT good FROM hm_drivers WHERE id="+QString::number(drv_id)+";");
+        if(QueryTail.next()){
+            zakon = QueryTail.value(0).toBool();
+        }
     }
 }
 
 void MainWindow::on_action_13_triggered()
 {
     SelectMap sm;
+    int fid;
     sm.setup("hm_cars");
     if ( sm.exec() ){
         car_id = sm.id;
-        fill_map();
-        repaint();
+        QSqlQuery QueryTail("SELECT fuel_id FROM hm_cars WHERE id="+QString::number(car_id)+";");
+        if(QueryTail.next()){
+            fid = QueryTail.value(0).toInt();
+        }
+
+        QSqlQuery QueryPrice("SELECT price FROM hm_fuel WHERE id="+QString::number(fid)+";");
+        if(QueryPrice.next()){
+            fuel_price = QueryPrice.value(0).toInt();
+        }
+        qDebug() << "Fuel price: " << fuel_price;
     }
 }
 
@@ -826,6 +862,7 @@ void MainWindow::on_comboBox_surface_currentIndexChanged(int index)
 {
     if ( edges.contains(selected_edge) ){
         edges[selected_edge]->surface_id = index;
+        edges[selected_edge]->max_speed = getSurfaceSpeed(index);
 
         qDebug() << "selected: " << selected_edge;
         QString str_upd_street = "UPDATE hm_edge SET surface_id="+QString::number(index)+" WHERE id="+QString::number(selected_edge)+";";
@@ -911,5 +948,51 @@ void MainWindow::on_checkBox_node_pol_toggled(bool checked)
         }
     } else {
         qDebug() << "Node not selected";
+    }
+}
+
+void MainWindow::on_action_11_triggered()
+{
+    gui_state = 20;
+    optimize(2);
+    ui->statusBar->showMessage(trUtf8("Стоимость: ")+QString::number(3.0*D[to_node]/100.0)+trUtf8(" р."), 2000);
+}
+
+void MainWindow::on_action_15_triggered()
+{
+    gui_state = 20;
+    optimize(3);
+    ui->statusBar->showMessage(trUtf8("Длительность: ")+QString::number(3*D[to_node]/40000.0)+trUtf8(" ч."), 2000);
+}
+
+double MainWindow::getSurfaceSpeed(int id){
+    QSqlQuery QueryTail("SELECT coef FROM hm_surface WHERE id="+QString::number(id)+";");
+    if(QueryTail.next()){
+        if (QueryTail.value(0).toString() != ""){
+            return QueryTail.value(0).toDouble();
+        }
+    }
+    return 0;
+}
+
+void MainWindow::on_checkBox_toggled(bool checked)
+{
+    if ( edges.contains(selected_edge) ){
+        edges[selected_edge]->policeman = checked;
+
+        qDebug() << "selected: " << selected_edge;
+        QString str_upd_street = "UPDATE hm_edge SET policeman="+QString(checked?"'true'":"'false'")+" WHERE id="+QString::number(selected_edge)+";";
+        qDebug() << str_upd_street;
+        QSqlQuery sqlQuery_upd_surface;
+        if (!sqlQuery_upd_surface.exec(str_upd_street))
+        {
+            qDebug() << "Edge polic update Error";
+        }
+        else
+        {
+            qDebug() << "Edge polic updated Success";
+        }
+    } else {
+        qDebug() << "Edge not selected";
     }
 }

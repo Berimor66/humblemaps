@@ -17,6 +17,7 @@ public:
     int street_id;
     bool policeman;
     int surface_id;
+    double max_speed;
 
 signals:
 

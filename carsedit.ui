@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>SurfaceEdit</class>
- <widget class="QDialog" name="SurfaceEdit">
+ <class>CarsEdit</class>
+ <widget class="QDialog" name="CarsEdit">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>428</width>
+    <width>430</width>
     <height>406</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Дорожные покрытия</string>
+   <string>Автомобили</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>

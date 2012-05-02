@@ -25,16 +25,52 @@ typedef vector<vii> vvii;
 const int MAX = 1001;
 const int MAXINT = 1000000000;
 
-int n;
-vvii G(MAX);
-vi D(MAX, MAXINT);
-vi P(MAX, MAXINT);
+void MainWindow::optimize(int what){
+    int n;
+    vvii G(MAX);
+    vi D(MAX, MAXINT);
+    vi P(MAX, MAXINT);
+    int a = 0, b = 1, w = 10, t;
 
-void MainWindow::Dijkstra(int s)
-{
+    path.clear();
+    G.clear();
+    D.clear();
+    P.clear();
+    n = 0;
+    foreach(HMEdge *edge, edges){
+        a = nodes.key(edge->start);
+        b = nodes.key(edge->end);
+        w = qSqrt( (edge->start->x - edge->end->x)*(edge->start->x - edge->end->x) +
+                   (edge->start->y - edge->end->y)*(edge->start->y - edge->end->y) );
+        if(what == 1){
+            G[a].push_back(ii(b, w));
+        }
+        if(what == 2){
+            w = fuel_price * w;
+            G[a].push_back(ii(b, w));
+            qDebug() << "zakon:" << zakon << " w:" << w << " a:" << a << " b:" << b << " policeman:" << edge->policeman;
+            if(!zakon){
+                if(edge->policeman){
+                    G[b].push_back(ii(a, 500+w));
+                } else {
+                    G[b].push_back(ii(a, w));
+                }
+            }
+        }
+        if(what == 3){
+            if(!zakon){
+                G[a].push_back( ii(b, w/min(max_speed, edge->max_speed) ));
+                G[b].push_back( ii(a, w/min(max_speed, edge->max_speed) ));
+            } else {
+                close();
+            }
+        }
+    }
+
+    /*===================================================*/
     set<ii> Q;
-    D[s] = 0;
-    Q.insert(ii(0,s));
+    D[from_node] = 0;
+    Q.insert(ii(0,from_node));
 
     while(!Q.empty())
     {
@@ -59,6 +95,27 @@ void MainWindow::Dijkstra(int s)
             }
         }
     }
+    /*=======================================================*/
+
+    if (P[to_node]<1000000){
+        t = to_node;
+        while(t != from_node){
+            qDebug() << t;
+            foreach(HMEdge *edge, edges){
+                if ( (nodes.key(edge->start) == t) && (nodes.key(edge->end) == P[t]) )
+                    path.push_back(edge);
+                if ( (nodes.key(edge->start) == P[t]) && (nodes.key(edge->end) == t) )
+                    path.push_back(edge);
+            }
+            t = P[t];
+        }
+    }
+    qDebug() << D[to_node];
+    opt_result = D[to_node];
+
+    repaint();
+    //qDebug() << P[to_node] << P[P[to_node]] << P[P[P[to_node]]] << P[P[P[P[to_node]]]];
+    return;
 }
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -168,63 +225,6 @@ void MainWindow::FillStreets(){
 bool MainWindow::load_map(){
 
     return true;
-}
-
-void MainWindow::optimize(int what){
-    int a = 0, b = 1, w = 10, t;
-
-    path.clear();
-    G.clear();
-    D.clear();
-    P.clear();
-    n = 0;
-    foreach(HMEdge *edge, edges){
-        a = nodes.key(edge->start);
-        b = nodes.key(edge->end);
-        w = qSqrt( (edge->start->x - edge->end->x)*(edge->start->x - edge->end->x) +
-                   (edge->start->y - edge->end->y)*(edge->start->y - edge->end->y) );
-        if(what == 1){
-            G[a].push_back(ii(b, w));
-        }
-        if(what == 2){
-            w = fuel_price * w;
-            G[a].push_back(ii(b, w));
-            qDebug() << "zakon:" << zakon << " w:" << w << " a:" << a << " b:" << b << " policeman:" << edge->policeman;
-            if(!zakon){
-                if(edge->policeman){
-                    G[b].push_back(ii(a, 500+w));
-                } else {
-                    G[b].push_back(ii(a, w));
-                }
-            }
-        }
-        if(what == 3){
-            if(!zakon){
-                G[a].push_back( ii(b, w/min(max_speed, edge->max_speed) ));
-                G[b].push_back( ii(a, w/min(max_speed, edge->max_speed) ));
-            } else {
-                close();
-            }
-        }
-    }
-    Dijkstra(from_node);
-    if (P[to_node]<1000000){
-        t = to_node;
-        while(t != from_node){
-            qDebug() << t;
-            foreach(HMEdge *edge, edges){
-                if ( (nodes.key(edge->start) == t) && (nodes.key(edge->end) == P[t]) )
-                    path.push_back(edge);
-                if ( (nodes.key(edge->start) == P[t]) && (nodes.key(edge->end) == t) )
-                    path.push_back(edge);
-            }
-            t = P[t];
-        }
-    }
-    qDebug() << D[to_node];
-    repaint();
-    //qDebug() << P[to_node] << P[P[to_node]] << P[P[P[to_node]]] << P[P[P[P[to_node]]]];
-    return;
 }
 
 void MainWindow::changeEvent(QEvent *e)
@@ -763,7 +763,7 @@ void MainWindow::on_action_8_triggered()
 {
     gui_state = 20;
     optimize(1);
-    ui->statusBar->showMessage(trUtf8("Расстояние: ")+QString::number(3*D[to_node])+trUtf8(" м."), 2000);
+    ui->statusBar->showMessage(trUtf8("Расстояние: ")+QString::number(3*opt_result)+trUtf8(" м."), 2000);
 }
 
 void MainWindow::on_action_9_triggered()
@@ -955,14 +955,14 @@ void MainWindow::on_action_11_triggered()
 {
     gui_state = 20;
     optimize(2);
-    ui->statusBar->showMessage(trUtf8("Стоимость: ")+QString::number(3.0*D[to_node]/100.0)+trUtf8(" р."), 2000);
+    ui->statusBar->showMessage(trUtf8("Стоимость: ")+QString::number(3.0*opt_result/100.0)+trUtf8(" р."), 2000);
 }
 
 void MainWindow::on_action_15_triggered()
 {
     gui_state = 20;
     optimize(3);
-    ui->statusBar->showMessage(trUtf8("Длительность: ")+QString::number(3*D[to_node]/40000.0)+trUtf8(" ч."), 2000);
+    ui->statusBar->showMessage(trUtf8("Длительность: ")+QString::number(3*opt_result/40000.0)+trUtf8(" ч."), 2000);
 }
 
 double MainWindow::getSurfaceSpeed(int id){

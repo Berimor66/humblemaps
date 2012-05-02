@@ -73,6 +73,8 @@ private:
     int drv_id;
     bool zakon;
 
+    double opt_result;
+
     QVector<HMEdge*> path;
     int from_node;
     int to_node;

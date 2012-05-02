@@ -78,6 +78,7 @@ MainWindow::MainWindow(QWidget *parent) :
 }
 
 void MainWindow::clear_map(){
+    map_id = -1;
     foreach(HMNode *node, nodes){
         delete node;
     }
@@ -97,13 +98,18 @@ void MainWindow::clear_map(){
 
 void MainWindow::fill_map(){
     qDebug() << "fill map" << map_id;
+    int map = map_id;
     clear_map();
+    map_id = map;
     QSqlQuery Query("SELECT * FROM hm_node WHERE map_id="+QString::number(map_id)+";");
     while(Query.next()){
         if (Query.value(0).toInt() >= uid)
             uid = Query.value(0).toInt() + 1;
         nodes[Query.value(0).toInt()] = new HMNode(Query.value(1).toInt(), Query.value(2).toInt());
-        //qDebug() << Query.value(1) << Query.value(2);
+
+        nodes[Query.value(0).toInt()]->polic = Query.value(4).toBool();
+        nodes[Query.value(0).toInt()]->red = Query.value(5).toDouble();
+        nodes[Query.value(0).toInt()]->green = Query.value(6).toDouble();
     }
     QSqlQuery Query_e("SELECT * FROM hm_edge WHERE map_id="+QString::number(map_id)+";");
     while(Query_e.next()){
@@ -113,6 +119,8 @@ void MainWindow::fill_map(){
            (nodes[Query_e.value(3).toInt()]!=NULL)){
             edges[Query_e.value(0).toInt()] = new HMEdge( nodes[Query_e.value(2).toInt()], nodes[Query_e.value(3).toInt()]);
             edges[Query_e.value(0).toInt()]->street_id = Query_e.value(1).toInt();
+            edges[Query_e.value(0).toInt()]->surface_id = Query_e.value(4).toInt();
+
         } else {
             qDebug() << "ERROR!!!";
             qDebug() << Query_e.value(2) << Query_e.value(3);
@@ -144,6 +152,14 @@ void MainWindow::FillStreets(){
     ui->comboBox_street->setModel(comboRelModel);
     ui->comboBox_street->setModelColumn(comboRelModel->fieldIndex("name"));
 
+    QSqlRelationalTableModel *comboModel_su = new QSqlRelationalTableModel(0);
+    comboModel_su->setTable("hm_surface");
+    int comboIndex_su = comboModel_su->fieldIndex("id");
+    comboModel_su->setRelation(comboIndex_su, QSqlRelation("hm_surface", "id", "name"));
+    comboModel_su->select();
+    QSqlTableModel *comboRelModel_su = comboModel_su->relationModel(comboIndex_su);
+    ui->comboBox_surface->setModel(comboRelModel_su);
+    ui->comboBox_surface->setModelColumn(comboRelModel->fieldIndex("name"));
 }
 
 bool MainWindow::load_map(){
@@ -165,7 +181,6 @@ void MainWindow::optimize(){
         w = qSqrt( (edge->start->x - edge->end->x)*(edge->start->x - edge->end->x) +
                    (edge->start->y - edge->end->y)*(edge->start->y - edge->end->y) );
         G[a].push_back(ii(b, w));
-        G[b].push_back(ii(a, w));
     }
     Dijkstra(from_node);
     if (P[to_node]<1000000){
@@ -389,15 +404,20 @@ void MainWindow::select_edge(int edge_num){
     selected_node = -1;
     selected_edge = edge_num;
     ui->comboBox_street->setCurrentIndex(edges[edge_num]->street_id);
+    ui->comboBox_surface->setCurrentIndex(edges[edge_num]->surface_id);
     ui->groupBox_street->show();
     ui->groupBox_node->hide();
     ui->checkBox->setChecked( edges[edge_num]->policeman );
-    ui->lineEdit_velocity->setText( QString::number( edges[edge_num]->max_velocity ) );
 }
 
 void MainWindow::select_node(int node_num){
     selected_edge = -1;
     selected_node = node_num;
+
+    ui->doubleSpinBox->setValue( nodes[node_num]->red );
+    ui->doubleSpinBox_2->setValue( nodes[node_num]->green );
+    ui->checkBox_node_pol->setChecked(nodes[node_num]->polic);
+
     ui->groupBox_street->hide();
     ui->groupBox_node->show();
 }
@@ -468,9 +488,8 @@ void MainWindow::mousePressEvent(QMouseEvent *event)
 }
 
 void MainWindow::add_node(int x, int y){
-    if (map_id > 100){
+    if ( (map_id > 1000) || (map_id < 0) ){
         qDebug() << "map_id not defined";
-        close();
         return;
     }
     QString str_add_fuel = "INSERT INTO hm_node (x, y, map_id) "
@@ -479,11 +498,11 @@ void MainWindow::add_node(int x, int y){
     QSqlQuery sqlQuery_add_fuel;
     if (!sqlQuery_add_fuel.exec(str_add_fuel))
     {
-        //QMessageBox::warning(this,trUtf8("Ошибка"),trUtf8("Запись не обновлена"));
+        qDebug() << "add_node error";
     }
     else
     {
-        //QMessageBox::information(this,trUtf8("Информация"),trUtf8("Запись добавлена"));
+        qDebug() << "add_node ok";
     }
     nodes[uid] = new HMNode(x, y);
 }
@@ -504,22 +523,29 @@ void MainWindow::del_node(int id){
         if(nodes[id]->start[i] != NULL){
             qDebug() << "start";
             del_edge(edges.key(nodes[id]->start[i]));
-            delete edges[edges.key(nodes[id]->start[i])];
+
+            int key = edges.key(nodes[id]->start[i]);
+            delete edges[key];
+            edges.remove(key);
             nodes[id]->start[i] = NULL;
-            edges.erase(edges.find(edges.key(nodes[id]->start[i])));
         }
         if(nodes[id]->end[i] != NULL){
             qDebug() << "end";
             del_edge(edges.key(nodes[id]->end[i]));
-            delete edges[edges.key(nodes[id]->end[i])];
-            edges.erase(edges.find(edges.key(nodes[id]->end[i])));
+
+            int key = edges.key(nodes[id]->end[i]);
+            delete edges[key];
+            edges.remove(key);
         }
     }
-
+    QString str_rem_surface = "DELETE FROM hm_node WHERE id="+QString::number(id);
+    qDebug() << "request: " << str_rem_surface;
+    QSqlQuery sqlQuery_rem_surface(str_rem_surface);
+    qDebug() << "result: " << sqlQuery_rem_surface.exec();
 }
 
 void MainWindow::add_edge(int st, int end){
-    if (map_id > 100){
+    if ( (map_id > 1000) || (map_id < 0) ){
         qDebug() << "map_id not defined";
         close();
         return;
@@ -530,11 +556,11 @@ void MainWindow::add_edge(int st, int end){
     QSqlQuery sqlQuery_add_fuel;
     if (!sqlQuery_add_fuel.exec(str_add_fuel))
     {
-        qDebug() << trUtf8("Запись не обновлена");
+        qDebug() << "add_edge error";
     }
     else
     {
-        qDebug() << trUtf8("Запись добавлена");
+        qDebug() << "add_edge ok";
     }
     edges[uid_edge] = new HMEdge(nodes[st], nodes[end]);
 }
@@ -701,8 +727,6 @@ void MainWindow::on_checkBox_clicked(bool checked)
 
 void MainWindow::on_lineEdit_velocity_returnPressed()
 {
-    if ( edges.contains(selected_edge) )
-        edges[selected_edge]->max_velocity = ui->lineEdit_velocity->text().toInt();
 }
 
 void MainWindow::on_action_5_triggered()
@@ -714,7 +738,7 @@ void MainWindow::on_action_8_triggered()
 {
     gui_state = 20;
     optimize();
-    QMessageBox::information(NULL,QObject::trUtf8("t"),QString::number(D[to_node]));
+    ui->statusBar->showMessage(trUtf8("Расстояние: ")+QString::number(3*D[to_node])+trUtf8(" м."), 2000);
 }
 
 void MainWindow::on_action_9_triggered()
@@ -788,7 +812,104 @@ void MainWindow::on_action_14_triggered()
             else
             {
                 qDebug() << "Tail updated Success";
+                picture = new QPixmap(text);
             }
         }
+    }
+}
+
+void MainWindow::on_lineEdit_velocity_textChanged(QString )
+{
+}
+
+void MainWindow::on_comboBox_surface_currentIndexChanged(int index)
+{
+    if ( edges.contains(selected_edge) ){
+        edges[selected_edge]->surface_id = index;
+
+        qDebug() << "selected: " << selected_edge;
+        QString str_upd_street = "UPDATE hm_edge SET surface_id="+QString::number(index)+" WHERE id="+QString::number(selected_edge)+";";
+        qDebug() << str_upd_street;
+        QSqlQuery sqlQuery_upd_surface;
+        if (!sqlQuery_upd_surface.exec(str_upd_street))
+        {
+            qDebug() << "Surface update Error";
+        }
+        else
+        {
+            qDebug() << "Surface updated Success";
+        }
+    } else {
+        qDebug() << "Edge not selected";
+    }
+}
+
+void MainWindow::on_lineEdit_returnPressed()
+{
+}
+
+void MainWindow::on_doubleSpinBox_valueChanged(double val)
+{
+    if ( nodes.contains(selected_node) ){
+        nodes[selected_node]->red = val;
+
+        qDebug() << "selected: " << selected_node;
+        QString str_upd_street = "UPDATE hm_node SET red="+QString::number(val)+" WHERE id="+QString::number(selected_node)+";";
+        qDebug() << str_upd_street;
+        QSqlQuery sqlQuery_upd_surface;
+        if (!sqlQuery_upd_surface.exec(str_upd_street))
+        {
+            qDebug() << "Node red update Error";
+        }
+        else
+        {
+            qDebug() << "Node red updated Success";
+        }
+    } else {
+        qDebug() << "Node not selected";
+    }
+}
+
+void MainWindow::on_doubleSpinBox_2_valueChanged(double val)
+{
+    if ( nodes.contains(selected_node) ){
+        nodes[selected_node]->green = val;
+
+        qDebug() << "selected: " << selected_node;
+        QString str_upd_street = "UPDATE hm_node SET green="+QString::number(val)+" WHERE id="+QString::number(selected_node)+";";
+        qDebug() << str_upd_street;
+        QSqlQuery sqlQuery_upd_surface;
+        if (!sqlQuery_upd_surface.exec(str_upd_street))
+        {
+            qDebug() << "Node green update Error";
+        }
+        else
+        {
+            qDebug() << "Node green updated Success";
+        }
+    } else {
+        qDebug() << "Node not selected";
+    }
+}
+
+void MainWindow::on_checkBox_node_pol_toggled(bool checked)
+{
+    if ( nodes.contains(selected_node) ){
+        nodes[selected_node]->polic = checked;
+
+        qDebug() << "selected: " << selected_node;
+        QString str_upd_street = "UPDATE hm_node SET pol="+QString(checked?"'true'":"'false'")+" WHERE id="+QString::number(selected_node)+";";
+        qDebug() << str_upd_street;
+        QSqlQuery sqlQuery_upd_surface;
+        if (!sqlQuery_upd_surface.exec(str_upd_street))
+        {
+            qDebug() << "Node polic update Error";
+        }
+        else
+        {
+            qDebug() << "Node polic updated Success";
+        }
+    } else {
+        qDebug() << "Node not selected";
     }
 }

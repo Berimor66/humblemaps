@@ -14,6 +14,9 @@ public:
     ~HMNode(void);
     double x;
     double y;
+    bool polic;
+    double red;
+    double green;
     HMEdge *start[4];
     HMEdge *end[4];
     bool add_st_edge(HMEdge * edge);

@@ -76,12 +76,19 @@
              </sizepolicy>
             </property>
             <property name="text">
-             <string>Ограничение скорости</string>
+             <string>Тип поверхности</string>
             </property>
            </widget>
           </item>
           <item>
-           <widget class="QLineEdit" name="lineEdit_velocity"/>
+           <widget class="QComboBox" name="comboBox_surface">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+           </widget>
           </item>
           <item>
            <widget class="QLabel" name="label_4">
@@ -157,7 +164,7 @@
            </widget>
           </item>
           <item>
-           <widget class="QLineEdit" name="lineEdit"/>
+           <widget class="QDoubleSpinBox" name="doubleSpinBox"/>
           </item>
           <item>
            <widget class="QLabel" name="label_3">
@@ -173,7 +180,7 @@
            </widget>
           </item>
           <item>
-           <widget class="QLineEdit" name="lineEdit_2"/>
+           <widget class="QDoubleSpinBox" name="doubleSpinBox_2"/>
           </item>
           <item>
            <widget class="QCheckBox" name="checkBox_node_pol">
@@ -265,7 +272,11 @@
    <addaction name="action_10"/>
    <addaction name="action_8"/>
   </widget>
-  <widget class="QStatusBar" name="statusBar"/>
+  <widget class="QStatusBar" name="statusBar">
+   <property name="statusTip">
+    <string/>
+   </property>
+  </widget>
   <action name="actionContents">
    <property name="text">
     <string>Содерджание</string>

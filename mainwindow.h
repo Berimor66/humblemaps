@@ -66,12 +66,20 @@ private:
     int map_id;
     int car_id;
     int drv_id;
+    double fuel_price;
+
     QVector<HMEdge*> path;
     int from_node;
     int to_node;
     void Dijkstra(int s);
 
 private slots:
+    void on_checkBox_node_pol_toggled(bool checked);
+    void on_doubleSpinBox_2_valueChanged(double );
+    void on_doubleSpinBox_valueChanged(double );
+    void on_lineEdit_returnPressed();
+    void on_comboBox_surface_currentIndexChanged(int index);
+    void on_lineEdit_velocity_textChanged(QString );
     void on_action_14_triggered();
     void on_comboBox_street_currentIndexChanged(QString );
     void on_action_3_triggered();

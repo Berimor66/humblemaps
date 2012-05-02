@@ -4,6 +4,8 @@
 #include "fueledit.h"
 #include "surfaceedit.h"
 #include "selectmap.h"
+#include "driversedit.h"
+#include "carsedit.h"
 #include <qmath.h>
 #include <QDebug>
 #include <QPainter>
@@ -179,16 +181,6 @@ void MainWindow::changeEvent(QEvent *e)
         break;
     default:
         break;
-    }
-}
-
-void MainWindow::on_actionOpen_triggered()
-{
-    SelectMap sm;
-    if ( sm.exec() ){
-        map_id = sm.map_id;
-        fill_map();
-        repaint();
     }
 }
 
@@ -517,9 +509,13 @@ void MainWindow::mouseReleaseEvent(QMouseEvent *event)
         if (event->button() == Qt::RightButton){
             end = findNode(event->x(), event->y());
             if(end>=0){
-                add_edge( selected_node, end );
-                //edges[uid_edge] = new HMEdge(nodes[selected_node], nodes[end]);
-                uid_edge++;
+                if(selected_node != end){
+                   add_edge( selected_node, end );
+                   uid_edge++;
+                   qDebug() << "edge added";
+               } else {
+                   qDebug() << "from to self";
+               }
             }
             gui_state = 0;
             repaint();
@@ -567,7 +563,7 @@ void MainWindow::on_action_7_triggered()
         if (sqlQuery_add_map.exec(str_add_map)){
             fill_map();
 
-            QSqlQuery Query1("SELECT LAST_INSERT_ID() FROM hm_maps;");
+            QSqlQuery Query1("SELECT last_insert_rowid() FROM hm_maps;");
             Query1.next();
             map_id = Query1.value(0).toInt()-1;
             repaint();
@@ -609,8 +605,9 @@ void MainWindow::on_action_2_triggered()
 void MainWindow::on_action_open_triggered()
 {
     SelectMap sm;
+    sm.setup("hm_maps");
     if ( sm.exec() ){
-        map_id = sm.map_id;
+        map_id = sm.id;
         fill_map();
         repaint();
     }
@@ -663,4 +660,42 @@ void MainWindow::on_action_9_triggered()
 void MainWindow::on_action_10_triggered()
 {
     gui_state = 22;
+}
+
+void MainWindow::on_actionOpen_triggered()
+{
+}
+
+void MainWindow::on_action_12_triggered()
+{
+    SelectMap sm;
+    sm.setup("hm_drivers");
+    if ( sm.exec() ){
+        drv_id = sm.id;
+        fill_map();
+        repaint();
+    }
+}
+
+void MainWindow::on_action_13_triggered()
+{
+    SelectMap sm;
+    sm.setup("hm_cars");
+    if ( sm.exec() ){
+        car_id = sm.id;
+        fill_map();
+        repaint();
+    }
+}
+
+void MainWindow::on_action_4_triggered()
+{
+    driversedit drve;
+    drve.exec();
+}
+
+void MainWindow::on_action_3_triggered()
+{
+    CarsEdit carse;
+    carse.exec();
 }

@@ -13,10 +13,6 @@
   <property name="windowTitle">
    <string>HumbleMaps</string>
   </property>
-  <property name="windowIcon">
-   <iconset>
-    <normaloff>../Users/Алексей/Desktop/icon100x100.png</normaloff>../Users/Алексей/Desktop/icon100x100.png</iconset>
-  </property>
   <widget class="QWidget" name="centralWidget">
    <property name="layoutDirection">
     <enum>Qt::LeftToRight</enum>
@@ -239,6 +235,9 @@
     <addaction name="action_8"/>
     <addaction name="action_9"/>
     <addaction name="action_10"/>
+    <addaction name="separator"/>
+    <addaction name="action_12"/>
+    <addaction name="action_13"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="title">
@@ -259,7 +258,7 @@
    <attribute name="toolBarBreak">
     <bool>false</bool>
    </attribute>
-   <addaction name="actionOpen"/>
+   <addaction name="action_open"/>
    <addaction name="action_9"/>
    <addaction name="action_10"/>
    <addaction name="action_8"/>
@@ -273,14 +272,6 @@
   <action name="actionAbout">
    <property name="text">
     <string>О программе</string>
-   </property>
-  </action>
-  <action name="actionOpen">
-   <property name="text">
-    <string>Открыть</string>
-   </property>
-   <property name="toolTip">
-    <string>Open</string>
    </property>
   </action>
   <action name="action">
@@ -336,6 +327,16 @@
   <action name="action_10">
    <property name="text">
     <string>Выбрать конец</string>
+   </property>
+  </action>
+  <action name="action_12">
+   <property name="text">
+    <string>выбрать водителя</string>
+   </property>
+  </action>
+  <action name="action_13">
+   <property name="text">
+    <string>выбрать автомобиль</string>
    </property>
   </action>
  </widget>

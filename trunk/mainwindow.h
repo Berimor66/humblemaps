@@ -56,12 +56,18 @@ private:
     int uid_edge;
     void FillStreets();
     int map_id;
+    int car_id;
+    int drv_id;
     QVector<HMEdge*> path;
     int from_node;
     int to_node;
     void Dijkstra(int s);
 
 private slots:
+    void on_action_3_triggered();
+    void on_action_4_triggered();
+    void on_action_13_triggered();
+    void on_action_12_triggered();
     void on_action_10_triggered();
     void on_action_9_triggered();
     void on_action_8_triggered();

@@ -8,6 +8,7 @@
 #include <QSqlQuery>
 #include <QSqlError>
 #include <QSqlResult>
+#include <QString>
 
 namespace Ui {
     class SelectMap;
@@ -20,7 +21,8 @@ class SelectMap : public QDialog
 public:
     explicit SelectMap(QWidget *parent = 0);
     ~SelectMap();
-    int map_id;
+    int id;
+    void setup(QString table);
 
 private:
     Ui::SelectMap *ui;

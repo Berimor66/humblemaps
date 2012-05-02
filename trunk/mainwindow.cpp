@@ -73,15 +73,20 @@ MainWindow::MainWindow(QWidget *parent) :
     qDebug() << trUtf8("Справочник ");
     clear_map();
     FillStreets();
+    ui->groupBox_node->setVisible(false);
+    ui->groupBox_street->setVisible(false);
 }
 
 void MainWindow::clear_map(){
     foreach(HMNode *node, nodes){
         delete node;
     }
+    picture = 0;
     path.clear();
     nodes.clear();
     edges.clear();
+    selected_edge = -1;
+    selected_node = -1;
     QSqlQuery Query("SELECT MAX(id) from hm_edge;");
     Query.next();
     uid_edge = Query.value(0).toInt()+1;
@@ -107,9 +112,19 @@ void MainWindow::fill_map(){
         if((nodes[Query_e.value(2).toInt()]!=NULL)&&
            (nodes[Query_e.value(3).toInt()]!=NULL)){
             edges[Query_e.value(0).toInt()] = new HMEdge( nodes[Query_e.value(2).toInt()], nodes[Query_e.value(3).toInt()]);
+            edges[Query_e.value(0).toInt()]->street_id = Query_e.value(1).toInt();
         } else {
             qDebug() << "ERROR!!!";
             qDebug() << Query_e.value(2) << Query_e.value(3);
+        }
+    }
+
+    QSqlQuery QueryTail("SELECT tile FROM hm_maps WHERE id="+QString::number(map_id)+";");
+    if(QueryTail.next()){
+        if (QueryTail.value(0).toString() != ""){
+            picture = new QPixmap(QueryTail.value(0).toString());
+        } else {
+            picture = 0;
         }
     }
 }
@@ -186,8 +201,24 @@ void MainWindow::changeEvent(QEvent *e)
 
 void MainWindow::on_comboBox_street_currentIndexChanged(int index)
 {
-    if ( edges.contains(selected_edge) )
+    if ( edges.contains(selected_edge) ){
         edges[selected_edge]->street_id = index;
+
+        qDebug() << "selected: " << selected_edge;
+        QString str_upd_street = "UPDATE hm_edge SET street_id="+QString::number(index)+" WHERE id="+QString::number(selected_edge)+";";
+        qDebug() << str_upd_street;
+        QSqlQuery sqlQuery_upd_surface;
+        if (!sqlQuery_upd_surface.exec(str_upd_street))
+        {
+            qDebug() << "Street update Error";
+        }
+        else
+        {
+            qDebug() << "Street updated Success";
+        }
+    } else {
+        qDebug() << "Edge not selected";
+    }
 }
 
 void MainWindow::paintEvent (QPaintEvent * event){
@@ -206,6 +237,18 @@ void MainWindow::paintEvent (QPaintEvent * event){
         brush.setStyle(Qt::SolidPattern);
 
         painter.begin(this);
+
+        if(picture != NULL)
+            painter.drawPixmap(ui->widget->geometry().x(),
+                               ui->widget->geometry().y()+43,
+                               ui->widget->geometry().width(),
+                               ui->widget->geometry().height(),
+                               *picture,
+                               0,
+                               0,
+                               ui->widget->geometry().width(),
+                               ui->widget->geometry().height());
+
         painter.setPen(pen);
         painter.setBrush(brush);
 
@@ -554,7 +597,7 @@ void MainWindow::on_action_triggered()
 void MainWindow::on_action_7_triggered()
 {
     bool ok;
-     QString text = QInputDialog::getText(this, trUtf8("Создание карты"),
+    QString text = QInputDialog::getText(this, trUtf8("Создание карты"),
                                           trUtf8("Название карты:"), QLineEdit::Normal,
                                           QDir::home().dirName(), &ok);
     if (ok && !text.isEmpty()){
@@ -566,6 +609,7 @@ void MainWindow::on_action_7_triggered()
             QSqlQuery Query1("SELECT last_insert_rowid() FROM hm_maps;");
             Query1.next();
             map_id = Query1.value(0).toInt()-1;
+            clear_map();
             repaint();
         }
     }
@@ -698,4 +742,32 @@ void MainWindow::on_action_3_triggered()
 {
     CarsEdit carse;
     carse.exec();
+}
+
+void MainWindow::on_comboBox_street_currentIndexChanged(QString )
+{
+}
+
+void MainWindow::on_action_14_triggered()
+{
+    if(map_id >= 0){
+        bool ok;
+        QString text = QInputDialog::getText(this, trUtf8("Выбор тайла"),
+                                              trUtf8("Путь к тайлу:"), QLineEdit::Normal,
+                                              QDir::home().dirName(), &ok);
+        if (ok && !text.isEmpty()){
+            qDebug() << "selected: " << text;
+            QString str_upd_street = "UPDATE hm_maps SET tile='"+text+"' WHERE id="+QString::number(map_id)+";";
+            qDebug() << str_upd_street;
+            QSqlQuery sqlQuery_upd_surface;
+            if (!sqlQuery_upd_surface.exec(str_upd_street))
+            {
+                qDebug() << "Tail update Error";
+            }
+            else
+            {
+                qDebug() << "Tail updated Success";
+            }
+        }
+    }
 }

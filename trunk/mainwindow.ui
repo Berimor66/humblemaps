@@ -238,6 +238,8 @@
     <addaction name="separator"/>
     <addaction name="action_12"/>
     <addaction name="action_13"/>
+    <addaction name="separator"/>
+    <addaction name="action_14"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="title">
@@ -337,6 +339,11 @@
   <action name="action_13">
    <property name="text">
     <string>выбрать автомобиль</string>
+   </property>
+  </action>
+  <action name="action_14">
+   <property name="text">
+    <string>выбрать изображение</string>
    </property>
   </action>
  </widget>

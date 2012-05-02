@@ -13,6 +13,7 @@
 #include "node.h"
 #include "map.h"
 #include <QMouseEvent>
+#include <QPixmap>
 
 namespace Ui {
     class MainWindow;
@@ -49,11 +50,18 @@ protected:
 
 private:
     Ui::MainWindow *ui;
+
     QHash<int, HMNode *> nodes;
     QHash<int, HMEdge *> edges;
+
+    QPixmap *picture;
+
     int gui_state;
+
+    //start counter for objects ids
     int uid;
     int uid_edge;
+
     void FillStreets();
     int map_id;
     int car_id;
@@ -64,6 +72,8 @@ private:
     void Dijkstra(int s);
 
 private slots:
+    void on_action_14_triggered();
+    void on_comboBox_street_currentIndexChanged(QString );
     void on_action_3_triggered();
     void on_action_4_triggered();
     void on_action_13_triggered();

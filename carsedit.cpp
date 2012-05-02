@@ -16,13 +16,24 @@ CarsEdit::~CarsEdit()
 
 void CarsEdit::FillTable()
 {
-    QString str_oper = "SELECT * FROM hm_cars";
+    QString str_oper = "SELECT hm_cars.id, hm_cars.name, hm_cars.speed, hm_fuel.name, hm_fuel.id FROM hm_cars INNER JOIN hm_fuel ON hm_cars.fuel_id = hm_fuel.id;";
     QSqlQueryModel * model_Oper = new QSqlQueryModel(0);
     model_Oper->setQuery(str_oper);
     model_Oper->setHeaderData(1, Qt::Horizontal, QObject::trUtf8("Название автомобиля"));
     model_Oper->setHeaderData(2, Qt::Horizontal, QObject::trUtf8("Максимальная скорость"));
+    model_Oper->setHeaderData(3, Qt::Horizontal, QObject::trUtf8("Тип топлива"));
     ui->tableView->setModel(model_Oper);
     ui->tableView->hideColumn(0);
+    ui->tableView->hideColumn(4);
+
+    QSqlRelationalTableModel *comboModel = new QSqlRelationalTableModel(0);
+    comboModel->setTable("hm_fuel");
+    int comboIndex = comboModel->fieldIndex("id");
+    comboModel->setRelation(comboIndex, QSqlRelation("hm_fuel", "id", "name"));
+    comboModel->select();
+    QSqlTableModel *comboRelModel = comboModel->relationModel(comboIndex);
+    ui->comboBox->setModel(comboRelModel);
+    ui->comboBox->setModelColumn(comboRelModel->fieldIndex("name"));
 }
 
 void CarsEdit::on_pushButton_del_clicked()
@@ -54,8 +65,8 @@ void CarsEdit::on_pushButton_add_clicked()
     }
     else
     {
-        QString str_add_surface = "INSERT INTO hm_cars (name, speed)"
-                                "VALUES ('"+ui->lineEdit->text()+"', "+ui->lineEdit_2->text()+");";
+        QString str_add_surface = "INSERT INTO hm_cars (name, speed, fuel_id)"
+                                  "VALUES ('"+ui->lineEdit->text()+"', "+ui->lineEdit_2->text()+", "+QString::number(ui->comboBox->currentIndex())+");";
 
         QSqlQuery sqlQuery_add_surface;
         if (!sqlQuery_add_surface.exec(str_add_surface))
@@ -76,7 +87,9 @@ void CarsEdit::on_pushButton_add_clicked()
 void CarsEdit::on_pushButton_save_clicked()
 {
     qDebug() << "selected: " << ui->tableView->model()->data(ui->tableView->model()->index(ui->tableView->currentIndex().row(),0)).toString();
-    QString str_upd_surface = "UPDATE hm_cars SET name='"+ui->lineEdit->text()+"', speed='"+ui->lineEdit_2->text()+
+    QString str_upd_surface = "UPDATE hm_cars SET name='"+ui->lineEdit->text()+
+                              "', speed='"+ui->lineEdit_2->text()+
+                              "', fuel_id='"+ QString::number(ui->comboBox->currentIndex())+
     "' WHERE id="+ui->tableView->model()->data(ui->tableView->model()->index(ui->tableView->currentIndex().row(),0)).toString();
     qDebug() << str_upd_surface;
     QSqlQuery sqlQuery_upd_surface;
@@ -97,4 +110,5 @@ void CarsEdit::on_tableView_clicked(QModelIndex index)
 {
     ui->lineEdit->setText(ui->tableView->model()->data(ui->tableView->model()->index(index.row(),1)).toString());
     ui->lineEdit_2->setText(ui->tableView->model()->data(ui->tableView->model()->index(index.row(),2)).toString());
+    ui->comboBox->setCurrentIndex(ui->tableView->model()->data(ui->tableView->model()->index(index.row(),4)).toInt());
 }

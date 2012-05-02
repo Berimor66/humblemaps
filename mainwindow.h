@@ -46,7 +46,8 @@ protected:
     void add_edge(int st, int end);
     void update_edge(int id);
     void del_edge(int id);
-    void optimize();
+    void optimize(int what);
+    double getSurfaceSpeed(int id);
 
 private:
     Ui::MainWindow *ui;
@@ -64,9 +65,13 @@ private:
 
     void FillStreets();
     int map_id;
+
     int car_id;
-    int drv_id;
     double fuel_price;
+    double max_speed;
+
+    int drv_id;
+    bool zakon;
 
     QVector<HMEdge*> path;
     int from_node;
@@ -74,6 +79,9 @@ private:
     void Dijkstra(int s);
 
 private slots:
+    void on_checkBox_toggled(bool checked);
+    void on_action_15_triggered();
+    void on_action_11_triggered();
     void on_checkBox_node_pol_toggled(bool checked);
     void on_doubleSpinBox_2_valueChanged(double );
     void on_doubleSpinBox_valueChanged(double );

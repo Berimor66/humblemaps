@@ -114,7 +114,6 @@ void MainWindow::optimize(int what){
     opt_result = D[to_node];
 
     repaint();
-    //qDebug() << P[to_node] << P[P[to_node]] << P[P[P[to_node]]] << P[P[P[P[to_node]]]];
     return;
 }
 

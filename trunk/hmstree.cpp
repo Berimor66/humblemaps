@@ -1,6 +1,6 @@
 #include "hmstree.h"
 
-HMStree::HMStree(QObject *parent) :
+HMStreet::HMStreet(QObject *parent) :
     QObject(parent)
 {
 }

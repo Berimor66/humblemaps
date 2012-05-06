@@ -1,13 +1,15 @@
-#ifndef HMSTREE_H
-#define HMSTREE_H
+#ifndef HMSTREET_H
+#define HMSTREET_H
 
 #include <QObject>
+#include <QString>
 
-class HMStree : public QObject
+class HMStreet : public QObject
 {
     Q_OBJECT
 public:
-    explicit HMStree(QObject *parent = 0);
+    explicit HMStreet(QObject *parent = 0);
+    QString name;
 
 signals:
 
@@ -15,4 +17,4 @@ public slots:
 
 };
 
-#endif // HMSTREE_H
+#endif // HMSTREET_H

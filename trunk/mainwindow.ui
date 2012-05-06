@@ -257,6 +257,7 @@
     </property>
     <addaction name="actionContents"/>
     <addaction name="actionAbout"/>
+    <addaction name="action_16"/>
    </widget>
    <addaction name="menuMap"/>
    <addaction name="menuEdit"/>
@@ -274,6 +275,8 @@
    <addaction name="action_9"/>
    <addaction name="action_10"/>
    <addaction name="action_8"/>
+   <addaction name="action_11"/>
+   <addaction name="action_15"/>
   </widget>
   <widget class="QStatusBar" name="statusBar">
    <property name="statusTip">
@@ -287,7 +290,7 @@
   </action>
   <action name="actionAbout">
    <property name="text">
-    <string>О программе</string>
+    <string>О системе</string>
    </property>
   </action>
   <action name="action">
@@ -316,6 +319,10 @@
    </property>
   </action>
   <action name="action_7">
+   <property name="icon">
+    <iconset>
+     <normaloff>img/file.png</normaloff>img/file.png</iconset>
+   </property>
    <property name="text">
     <string>Создать</string>
    </property>
@@ -326,48 +333,89 @@
    </property>
   </action>
   <action name="action_open">
+   <property name="icon">
+    <iconset>
+     <normaloff>img/folder.png</normaloff>img/folder.png</iconset>
+   </property>
    <property name="text">
     <string>Открыть</string>
    </property>
   </action>
   <action name="action_8">
+   <property name="icon">
+    <iconset>
+     <normaloff>img/ruler.png</normaloff>img/ruler.png</iconset>
+   </property>
    <property name="text">
     <string>Построить наиболее короткий маршрут</string>
    </property>
   </action>
   <action name="action_9">
+   <property name="icon">
+    <iconset>
+     <normaloff>img/up.png</normaloff>img/up.png</iconset>
+   </property>
    <property name="text">
     <string>Выбрать начало</string>
    </property>
   </action>
   <action name="action_10">
+   <property name="icon">
+    <iconset>
+     <normaloff>img/down.png</normaloff>img/down.png</iconset>
+   </property>
    <property name="text">
     <string>Выбрать конец</string>
    </property>
   </action>
   <action name="action_12">
+   <property name="icon">
+    <iconset>
+     <normaloff>img/user.png</normaloff>img/user.png</iconset>
+   </property>
    <property name="text">
     <string>выбрать водителя</string>
    </property>
   </action>
   <action name="action_13">
+   <property name="icon">
+    <iconset>
+     <normaloff>img/car.png</normaloff>img/car.png</iconset>
+   </property>
    <property name="text">
     <string>выбрать автомобиль</string>
    </property>
   </action>
   <action name="action_14">
+   <property name="icon">
+    <iconset>
+     <normaloff>img/map.png</normaloff>img/map.png</iconset>
+   </property>
    <property name="text">
     <string>выбрать изображение</string>
    </property>
   </action>
   <action name="action_11">
+   <property name="icon">
+    <iconset>
+     <normaloff>img/moneybox.png</normaloff>img/moneybox.png</iconset>
+   </property>
    <property name="text">
     <string>Построить наиболее дешёвый маршрут</string>
    </property>
   </action>
   <action name="action_15">
+   <property name="icon">
+    <iconset>
+     <normaloff>img/alarm_clock.png</normaloff>img/alarm_clock.png</iconset>
+   </property>
    <property name="text">
     <string>Построить наиболее быстрый маршрут</string>
+   </property>
+  </action>
+  <action name="action_16">
+   <property name="text">
+    <string>Об авторах</string>
    </property>
   </action>
  </widget>

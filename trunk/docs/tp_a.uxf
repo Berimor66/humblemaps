@@ -242,7 +242,7 @@
       <w>80</w>
       <h>110</h>
     </coordinates>
-    <panel_attributes>lt=&lt;.</panel_attributes>
+    <panel_attributes>lt=-&gt;&gt;&gt;</panel_attributes>
     <additional_attributes>30;90;60;90;60;30;30;30</additional_attributes>
   </element>
   <element>
@@ -253,7 +253,7 @@
       <w>90</w>
       <h>220</h>
     </coordinates>
-    <panel_attributes>lt=&lt;.</panel_attributes>
+    <panel_attributes>lt=-&gt;&gt;&gt;</panel_attributes>
     <additional_attributes>30;200;70;200;70;30;30;30</additional_attributes>
   </element>
   <element>

@@ -16,7 +16,7 @@
     <type>com.umlet.element.Note</type>
     <coordinates>
       <x>460</x>
-      <y>120</y>
+      <y>90</y>
       <w>140</w>
       <h>70</h>
     </coordinates>
@@ -104,12 +104,12 @@
     <type>com.umlet.element.Relation</type>
     <coordinates>
       <x>400</x>
-      <y>110</y>
+      <y>80</y>
       <w>80</w>
-      <h>50</h>
+      <h>80</h>
     </coordinates>
     <panel_attributes>lt=&lt;.</panel_attributes>
-    <additional_attributes>60;30;30;30</additional_attributes>
+    <additional_attributes>60;30;30;60</additional_attributes>
   </element>
   <element>
     <type>com.umlet.element.Relation</type>
@@ -180,12 +180,24 @@
   <element>
     <type>com.umlet.element.Relation</type>
     <coordinates>
-      <x>400</x>
-      <y>150</y>
-      <w>80</w>
-      <h>100</h>
+      <x>370</x>
+      <y>160</y>
+      <w>110</w>
+      <h>90</h>
     </coordinates>
     <panel_attributes>lt=&lt;.</panel_attributes>
-    <additional_attributes>60;80;30;30</additional_attributes>
+    <additional_attributes>90;70;30;30</additional_attributes>
+  </element>
+  <element>
+    <type>com.umlet.element.Relation</type>
+    <coordinates>
+      <x>400</x>
+      <y>150</y>
+      <w>200</w>
+      <h>50</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;()
+r1=GUI</panel_attributes>
+    <additional_attributes>180;30;30;30</additional_attributes>
   </element>
 </diagram>

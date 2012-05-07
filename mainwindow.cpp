@@ -60,12 +60,13 @@ void MainWindow::optimize(int what){
         }
         if(what == 3){
             w = w/min(max_speed, edge->max_speed);
-            G[a].push_back( ii(b, w) );
+
             if(!zakon){
                 G[b].push_back( ii(a, w) );
             } else {
-                qDebug() << "ADD TRAFFIC LIGHTS!!!";
+                w + edge->start->red + edge->end->red;
             }
+            G[a].push_back( ii(b, w) );
         }
     }
 

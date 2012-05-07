@@ -52,18 +52,19 @@ void MainWindow::optimize(int what){
             qDebug() << "zakon:" << zakon << " w:" << w << " a:" << a << " b:" << b << " policeman:" << edge->policeman;
             if(!zakon){
                 if(edge->policeman){
-                    G[b].push_back(ii(a, 500+w));
+                    G[b].push_back(ii(a, 50000/3+w));
                 } else {
                     G[b].push_back(ii(a, w));
                 }
             }
         }
         if(what == 3){
+            w = w/min(max_speed, edge->max_speed);
+            G[a].push_back( ii(b, w) );
             if(!zakon){
-                G[a].push_back( ii(b, w/min(max_speed, edge->max_speed) ));
-                G[b].push_back( ii(a, w/min(max_speed, edge->max_speed) ));
+                G[b].push_back( ii(a, w) );
             } else {
-                close();
+                qDebug() << "ADD TRAFFIC LIGHTS!!!";
             }
         }
     }
@@ -433,6 +434,10 @@ void MainWindow::select_edge(int edge_num){
     ui->groupBox_street->show();
     ui->groupBox_node->hide();
     ui->checkBox->setChecked( edges[edge_num]->policeman );
+
+    double x = edges[edge_num]->start->x-edges[edge_num]->end->x;
+    double y = edges[edge_num]->start->y-edges[edge_num]->end->y;
+    ui->labelStreetLength->setText(QString::number(3*(sqrt(x*x+y*y)))+trUtf8(" м."));
 }
 
 void MainWindow::select_node(int node_num){
@@ -613,8 +618,14 @@ void MainWindow::mouseReleaseEvent(QMouseEvent *event)
     case 2:
         if (event->button() == Qt::LeftButton){
             add_node(event->x()-5, event->y()-5);
-            select_node(uid);
-            uid++;
+
+            QHash<int, HMNode *>::const_iterator i = nodes.find(uid);
+            if (i != nodes.end()){
+                select_node(uid);
+                uid++;
+            } else {
+                ui->statusBar->showMessage(trUtf8("Откройте или создайте карту"), 2000);
+            }
             gui_state = 0;
             qDebug() << "added node";
             repaint();
@@ -763,7 +774,7 @@ void MainWindow::on_action_8_triggered()
 {
     gui_state = 20;
     optimize(1);
-    ui->statusBar->showMessage(trUtf8("Расстояние: ")+QString::number(3*opt_result)+trUtf8(" м."), 2000);
+    ui->statusBar->showMessage(trUtf8("Расстояние: ")+QString::number(3*opt_result)+trUtf8(" м."), 10000);
 }
 
 void MainWindow::on_action_9_triggered()
@@ -800,9 +811,10 @@ void MainWindow::on_action_13_triggered()
     sm.setup("hm_cars");
     if ( sm.exec() ){
         car_id = sm.id;
-        QSqlQuery QueryTail("SELECT fuel_id FROM hm_cars WHERE id="+QString::number(car_id)+";");
+        QSqlQuery QueryTail("SELECT fuel_id, speed FROM hm_cars WHERE id="+QString::number(car_id)+";");
         if(QueryTail.next()){
             fid = QueryTail.value(0).toInt();
+            max_speed = QueryTail.value(1).toDouble();
         }
 
         QSqlQuery QueryPrice("SELECT price FROM hm_fuel WHERE id="+QString::number(fid)+";");
@@ -810,6 +822,7 @@ void MainWindow::on_action_13_triggered()
             fuel_price = QueryPrice.value(0).toInt();
         }
         qDebug() << "Fuel price: " << fuel_price;
+
     }
 }
 
@@ -955,14 +968,14 @@ void MainWindow::on_action_11_triggered()
 {
     gui_state = 20;
     optimize(2);
-    ui->statusBar->showMessage(trUtf8("Стоимость: ")+QString::number(3.0*opt_result/100.0)+trUtf8(" р."), 2000);
+    ui->statusBar->showMessage(trUtf8("Стоимость: ")+QString::number(3.0*opt_result/100.0)+trUtf8(" р."), 10000);
 }
 
 void MainWindow::on_action_15_triggered()
 {
     gui_state = 20;
     optimize(3);
-    ui->statusBar->showMessage(trUtf8("Длительность: ")+QString::number(3*opt_result/40000.0)+trUtf8(" ч."), 2000);
+    ui->statusBar->showMessage(trUtf8("Длительность: ")+QString::number(3*opt_result/100.0)+trUtf8(" ч."), 10000);
 }
 
 double MainWindow::getSurfaceSpeed(int id){

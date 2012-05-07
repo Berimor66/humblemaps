@@ -121,6 +121,19 @@
            </widget>
           </item>
           <item>
+           <widget class="QLabel" name="labelStreetLength">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="text">
+             <string>0 м.</string>
+            </property>
+           </widget>
+          </item>
+          <item>
            <widget class="QWidget" name="widget_2" native="true"/>
           </item>
          </layout>

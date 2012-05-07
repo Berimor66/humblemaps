@@ -12,6 +12,7 @@
 #include <QPen>
 #include <QBrush>
 #include <QInputDialog>
+#include <QDesktopServices>
 #include <vector>
 #include <set>
 
@@ -994,4 +995,22 @@ void MainWindow::on_checkBox_toggled(bool checked)
     } else {
         qDebug() << "Edge not selected";
     }
+}
+
+void MainWindow::on_action_16_triggered()
+{
+    QMessageBox::information(this,trUtf8("Об авторах"),trUtf8("Программу разработал:\n\tстудент группы 6403\n\tНазаров Юрий\nРуководитель проекта:\n\tдоцент кафедры программных систем\n\tЗеленко Лариса Сергеевна"));
+}
+
+void MainWindow::on_actionAbout_triggered()
+{
+    QMessageBox::information(this,trUtf8("О системе"),trUtf8("Программа разработана в рамках курсового проекта\n\"Автоматизированная система поиска оптимального пути по заданному критерию\"\nпо дисциплине \"Технологии программирования\""));
+}
+
+void MainWindow::on_actionContents_triggered()
+{
+    if(QFile("docs/help.mht").exists())
+        QDesktopServices::openUrl( QUrl("docs/help.mht") );
+    else
+        QMessageBox::critical(this,trUtf8("Ошибка"),trUtf8("Фаил справки не найден"));
 }

@@ -81,6 +81,9 @@ private:
     void Dijkstra(int s);
 
 private slots:
+    void on_actionContents_triggered();
+    void on_actionAbout_triggered();
+    void on_action_16_triggered();
     void on_checkBox_toggled(bool checked);
     void on_action_15_triggered();
     void on_action_11_triggered();
